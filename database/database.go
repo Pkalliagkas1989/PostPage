@@ -3,7 +3,6 @@ package database
 import (
 	"database/sql"
 	"fmt"
-	"os"
 	"path/filepath"
 
 	_ "github.com/mattn/go-sqlite3"
@@ -11,14 +10,7 @@ import (
 
 // initDB initializes the database and returns a connection
 func InitDB() (*sql.DB, error) {
-	// Create database directory if it doesn't exist
-	dbDir := "./database"
-	if err := os.MkdirAll(dbDir, 0755); err != nil {
-		return nil, fmt.Errorf("failed to create database directory: %v", err)
-	}
-
-	// Connect to SQLite database (will be created if it doesn't exist)
-	dbPath := filepath.Join(dbDir, "forum.db")
+	dbPath := filepath.Join("./database", "forum.db")
 	db, err := sql.Open("sqlite3", dbPath+"?_foreign_keys=on")
 	if err != nil {
 		return nil, fmt.Errorf("failed to open database: %v", err)
@@ -32,6 +24,7 @@ func InitDB() (*sql.DB, error) {
 
 	// Set some basic connection pool settings
 	db.SetMaxOpenConns(10)
+	db.SetMaxIdleConns(5)
 
 	// Initialize database schema and data
 	if err := createTables(db); err != nil {
@@ -63,80 +56,83 @@ func createTables(db *sql.DB) error {
 	// Define all table creation SQL statements
 	tableStatements := []string{
 		// Users table
+		// Users table
 		`CREATE TABLE IF NOT EXISTS user (
-			user_id TEXT PRIMARY KEY,
-			username TEXT NOT NULL UNIQUE,
-			email TEXT NOT NULL UNIQUE,
-			created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
-		);`,
+            user_id TEXT PRIMARY KEY,
+            username TEXT NOT NULL UNIQUE CHECK (LENGTH(username) <= 50),
+            email TEXT NOT NULL UNIQUE CHECK (LENGTH(email) <= 100),
+            created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+        );`,
 
 		// User authentication table
 		`CREATE TABLE IF NOT EXISTS user_auth (
-			user_id TEXT PRIMARY KEY,
-			password_hash TEXT NOT NULL,
-			FOREIGN KEY (user_id) REFERENCES user(user_id) ON DELETE CASCADE
-		);`,
+            user_id TEXT PRIMARY KEY,
+            password_hash TEXT NOT NULL CHECK (LENGTH(password_hash) <= 255),
+            FOREIGN KEY (user_id) REFERENCES user(user_id) ON DELETE CASCADE
+        );`,
 
 		// Sessions table
 		`CREATE TABLE IF NOT EXISTS sessions (
-			user_id TEXT PRIMARY KEY,
-			session_id TEXT NOT NULL UNIQUE,
-			ip_address TEXT,
-			created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-			expires_at TIMESTAMP NOT NULL,
-			FOREIGN KEY (user_id) REFERENCES user(user_id) ON DELETE CASCADE
-		);`,
+            user_id TEXT PRIMARY KEY,
+            session_id TEXT NOT NULL UNIQUE,
+            ip_address TEXT,
+            created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+            expires_at TIMESTAMP NOT NULL,
+            FOREIGN KEY (user_id) REFERENCES user(user_id) ON DELETE CASCADE
+        );`,
 
 		// Categories table
 		`CREATE TABLE IF NOT EXISTS categories (
-			category_id INTEGER PRIMARY KEY AUTOINCREMENT,
-			name TEXT NOT NULL UNIQUE
-		);`,
-
+            category_id INTEGER PRIMARY KEY AUTOINCREMENT,
+            name TEXT NOT NULL UNIQUE CHECK (LENGTH(name) <= 100)
+        );`,
 		// Posts table
 		`CREATE TABLE IF NOT EXISTS posts (
-			post_id TEXT PRIMARY KEY,
-			user_id TEXT NOT NULL,
-			category_id INTEGER NOT NULL,
-			content TEXT NOT NULL,
-			created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-			updated_at TIMESTAMP,
-			FOREIGN KEY (user_id) REFERENCES user(user_id) ON DELETE CASCADE,
-			FOREIGN KEY (category_id) REFERENCES categories(category_id) ON DELETE CASCADE
-		);`,
+            post_id TEXT PRIMARY KEY,
+            user_id TEXT NOT NULL,
+            category_id INTEGER NOT NULL,
+            content TEXT NOT NULL CHECK (LENGTH(content) <= 2000),
+            created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+            updated_at TIMESTAMP,
+            FOREIGN KEY (user_id) REFERENCES user(user_id) ON DELETE CASCADE,
+            FOREIGN KEY (category_id) REFERENCES categories(category_id) ON DELETE CASCADE
+        );`,
 
 		// Comments table
 		`CREATE TABLE IF NOT EXISTS comments (
-			comment_id TEXT PRIMARY KEY,
-			post_id TEXT NOT NULL,
-			user_id TEXT NOT NULL,
-			content TEXT NOT NULL,
-			created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-			updated_at TIMESTAMP,
-			FOREIGN KEY (post_id) REFERENCES posts(post_id) ON DELETE CASCADE,
-			FOREIGN KEY (user_id) REFERENCES user(user_id) ON DELETE CASCADE
-		);`,
+            comment_id TEXT PRIMARY KEY,
+            post_id TEXT NOT NULL,
+            user_id TEXT NOT NULL,
+            content TEXT NOT NULL CHECK (LENGTH(content) <= 1000),
+            created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+            updated_at TIMESTAMP,
+            FOREIGN KEY (post_id) REFERENCES posts(post_id) ON DELETE CASCADE,
+            FOREIGN KEY (user_id) REFERENCES user(user_id) ON DELETE CASCADE
+        );`,
 
 		// Reactions table
 		`CREATE TABLE IF NOT EXISTS reactions (
-			user_id TEXT NOT NULL,
-			reaction_type INTEGER NOT NULL, -- 1 for like, 2 for dislike
-			comment_id TEXT,
-			post_id TEXT,
-			created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-			PRIMARY KEY (user_id, comment_id, post_id),
-			FOREIGN KEY (user_id) REFERENCES user(user_id) ON DELETE CASCADE,
-			FOREIGN KEY (comment_id) REFERENCES comments(comment_id) ON DELETE CASCADE,
-			FOREIGN KEY (post_id) REFERENCES posts(post_id) ON DELETE CASCADE,
-			CHECK ((post_id IS NULL AND comment_id IS NOT NULL) OR (post_id IS NOT NULL AND comment_id IS NULL))
-		);`,
+            user_id TEXT NOT NULL,
+            reaction_type INTEGER NOT NULL CHECK (reaction_type IN (1, 2, 3)),
+            comment_id TEXT,
+            post_id TEXT,
+            created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+            PRIMARY KEY (user_id, comment_id, post_id),
+            FOREIGN KEY (user_id) REFERENCES user(user_id) ON DELETE CASCADE,
+            FOREIGN KEY (comment_id) REFERENCES comments(comment_id) ON DELETE CASCADE,
+            FOREIGN KEY (post_id) REFERENCES posts(post_id) ON DELETE CASCADE,
+            CHECK (
+                (post_id IS NULL AND comment_id IS NOT NULL) OR
+                (post_id IS NOT NULL AND comment_id IS NULL)
+            )
+        );`,
 	}
 
 	// Execute each table creation statement
 	for _, stmt := range tableStatements {
 		_, err = tx.Exec(stmt)
 		if err != nil {
-			return fmt.Errorf("failed to execute statement: %s: %v", stmt, err)
+			return fmt.Errorf("failed to execute create table statement: %s: %v", stmt, err)
 		}
 	}
 
@@ -167,7 +163,7 @@ func createIndexes(db *sql.DB) error {
 	for _, stmt := range indexStatements {
 		_, err = tx.Exec(stmt)
 		if err != nil {
-			return fmt.Errorf("failed to execute statement: %s: %v", stmt, err)
+			return fmt.Errorf("failed to execute create index statement: %s: %v", stmt, err)
 		}
 	}
 
@@ -187,20 +183,6 @@ func populateCategories(db *sql.DB) error {
 	if count > 0 {
 		fmt.Println("Categories already exist, skipping population.")
 		return nil
-	}
-
-	// Define the categories to add
-	categories := []string{
-		"General Discussion",
-		"Programming",
-		"Golang",
-		"Web Development",
-		"Database Systems",
-		"DevOps",
-		"Mobile Development",
-		"Machine Learning",
-		"Security",
-		"Off-Topic",
 	}
 
 	// Start a transaction
