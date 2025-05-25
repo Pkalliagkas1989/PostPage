@@ -1,10 +1,11 @@
-package models
+package repository
 
 import (
 	"database/sql"
 	"errors"
 	"time"
 
+	"forum/models"
 	"forum/utils"
 )
 
@@ -24,7 +25,7 @@ func NewSessionRepository(db *sql.DB) *SessionRepository {
 }
 
 // Create creates a new session for a user
-func (r *SessionRepository) Create(userID, ipAddress string) (*Session, error) {
+func (r *SessionRepository) Create(userID, ipAddress string) (*models.Session, error) {
 	// First, delete any existing sessions for this user
 	_, err := r.DB.Exec("DELETE FROM sessions WHERE user_id = ?", userID)
 	if err != nil {
@@ -45,7 +46,7 @@ func (r *SessionRepository) Create(userID, ipAddress string) (*Session, error) {
 	}
 
 	// Return the session
-	session := &Session{
+	session := &models.Session{
 		UserID:    userID,
 		SessionID: sessionID,
 		IPAddress: ipAddress,
@@ -57,8 +58,8 @@ func (r *SessionRepository) Create(userID, ipAddress string) (*Session, error) {
 }
 
 // GetBySessionID retrieves a session by its ID
-func (r *SessionRepository) GetBySessionID(sessionID string) (*Session, error) {
-	var session Session
+func (r *SessionRepository) GetBySessionID(sessionID string) (*models.Session, error) {
+	var session models.Session
 	var createdStr, expiresStr string
 
 	err := r.DB.QueryRow(

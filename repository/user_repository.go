@@ -1,17 +1,18 @@
-package models
+package repository
 
 import (
 	"database/sql"
 	"errors"
 	"time"
 
+	"forum/models"
 	"forum/utils"
 )
 
 var (
-	ErrUserNotFound      = errors.New("user not found")
-	ErrEmailTaken        = errors.New("email is already taken")
-	ErrUsernameTaken     = errors.New("username is already taken")
+	ErrUserNotFound       = errors.New("user not found")
+	ErrEmailTaken         = errors.New("email is already taken")
+	ErrUsernameTaken      = errors.New("username is already taken")
 	ErrInvalidCredentials = errors.New("invalid credentials")
 )
 
@@ -26,7 +27,7 @@ func NewUserRepository(db *sql.DB) *UserRepository {
 }
 
 // Create adds a new user to the database
-func (r *UserRepository) Create(reg UserRegistration) (*User, error) {
+func (r *UserRepository) Create(reg models.UserRegistration) (*models.User, error) {
 	// Check if email is already taken
 	var count int
 	err := r.DB.QueryRow("SELECT COUNT(*) FROM user WHERE email = ?", reg.Email).Scan(&count)
@@ -86,7 +87,7 @@ func (r *UserRepository) Create(reg UserRegistration) (*User, error) {
 	}
 
 	// Return the newly created user
-	user := &User{
+	user := &models.User{
 		ID:        userID,
 		Username:  reg.Username,
 		Email:     reg.Email,
@@ -97,8 +98,8 @@ func (r *UserRepository) Create(reg UserRegistration) (*User, error) {
 }
 
 // GetByEmail retrieves a user by email
-func (r *UserRepository) GetByEmail(email string) (*User, error) {
-	var user User
+func (r *UserRepository) GetByEmail(email string) (*models.User, error) {
+	var user models.User
 	var timestamp string
 
 	err := r.DB.QueryRow(
@@ -123,8 +124,8 @@ func (r *UserRepository) GetByEmail(email string) (*User, error) {
 }
 
 // GetByID retrieves a user by ID
-func (r *UserRepository) GetByID(id string) (*User, error) {
-	var user User
+func (r *UserRepository) GetByID(id string) (*models.User, error) {
+	var user models.User
 	var timestamp string
 
 	err := r.DB.QueryRow(
@@ -149,8 +150,8 @@ func (r *UserRepository) GetByID(id string) (*User, error) {
 }
 
 // GetAuthByUserID retrieves user authentication data by user ID
-func (r *UserRepository) GetAuthByUserID(userID string) (*UserAuth, error) {
-	var auth UserAuth
+func (r *UserRepository) GetAuthByUserID(userID string) (*models.UserAuth, error) {
+	var auth models.UserAuth
 
 	err := r.DB.QueryRow(
 		"SELECT user_id, password_hash FROM user_auth WHERE user_id = ?",
@@ -168,7 +169,7 @@ func (r *UserRepository) GetAuthByUserID(userID string) (*UserAuth, error) {
 }
 
 // Authenticate validates a user's login credentials
-func (r *UserRepository) Authenticate(login UserLogin) (*User, error) {
+func (r *UserRepository) Authenticate(login models.UserLogin) (*models.User, error) {
 	// Get the user by email
 	user, err := r.GetByEmail(login.Email)
 	if err != nil {
