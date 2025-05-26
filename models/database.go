@@ -14,9 +14,9 @@ func InitDB() (*sql.DB, error) {
 	dbPath := filepath.Join("./database", "forum.db")
 
 	// Check if database file exists
-	
+	firstTime := false
 	if _, err := os.Stat(dbPath); os.IsNotExist(err) {
-		
+		firstTime = true
 		// Create directory if it doesn't exist
 		if err := os.MkdirAll("./database", 0755); err != nil {
 			return nil, fmt.Errorf("failed to create database directory: %v", err)
@@ -39,19 +39,24 @@ func InitDB() (*sql.DB, error) {
 	db.SetMaxIdleConns(5)
 
 	// Initialize database schema and data
-	if err := createTables(db); err != nil {
+	if firstTime {
+		if err := createTables(db); err != nil {
 		db.Close()
 		return nil, fmt.Errorf("failed to create tables: %v", err)
-	}
+		}
 
-	if err := createIndexes(db); err != nil {
-		db.Close()
-		return nil, fmt.Errorf("failed to create indexes: %v", err)
-	}
+		if err := createIndexes(db); err != nil {
+			db.Close()
+			return nil, fmt.Errorf("failed to create indexes: %v", err)
+		}
 
-	if err := populateCategories(db); err != nil {
-		db.Close()
-		return nil, fmt.Errorf("failed to populate categories: %v", err)
+		if err := populateCategories(db); err != nil {
+			db.Close()
+			return nil, fmt.Errorf("failed to populate categories: %v", err)
+		}
+		fmt.Println("Database initialized successfully.")
+	} else {
+		fmt.Println("Database already exists. Skipping initialization.")
 	}
 
 	return db, nil
