@@ -1,9 +1,9 @@
 // Define the categories to add
-package database
+package models
 
 import ()
 
-var categories = []string{
+var Categories = []string{
 	"General",
 	"Software Development",
 	"Hobbies",

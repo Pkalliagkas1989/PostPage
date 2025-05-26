@@ -1,8 +1,9 @@
-package database
+package models
 
 import (
 	"database/sql"
 	"fmt"
+	"os"
 	"path/filepath"
 
 	_ "github.com/mattn/go-sqlite3"
@@ -11,6 +12,17 @@ import (
 // initDB initializes the database and returns a connection
 func InitDB() (*sql.DB, error) {
 	dbPath := filepath.Join("./database", "forum.db")
+
+	// Check if database file exists
+	
+	if _, err := os.Stat(dbPath); os.IsNotExist(err) {
+		
+		// Create directory if it doesn't exist
+		if err := os.MkdirAll("./database", 0755); err != nil {
+			return nil, fmt.Errorf("failed to create database directory: %v", err)
+		}
+	}
+
 	db, err := sql.Open("sqlite3", dbPath+"?_foreign_keys=on")
 	if err != nil {
 		return nil, fmt.Errorf("failed to open database: %v", err)
@@ -129,10 +141,10 @@ func createTables(db *sql.DB) error {
 	}
 
 	// Execute each table creation statement
-	for _, stmt := range tableStatements {
+	for i, stmt := range tableStatements {
 		_, err = tx.Exec(stmt)
 		if err != nil {
-			return fmt.Errorf("failed to execute create table statement: %s: %v", stmt, err)
+			return fmt.Errorf("statement %d failed: %v\nSQL: %s", i+1, err, stmt)
 		}
 	}
 
@@ -200,7 +212,7 @@ func populateCategories(db *sql.DB) error {
 	defer stmt.Close()
 
 	// Insert each category
-	for _, category := range categories {
+	for _, category := range Categories {
 		_, err = stmt.Exec(category)
 		if err != nil {
 			return fmt.Errorf("failed to insert category '%s': %v", category, err)

@@ -5,13 +5,13 @@ import (
 	"log"
 	"net/http"
 
-	"forum/database"
+	"forum/models"
 	"forum/routes"
 )
 
 func main() {
 	// Initialize database
-	db, err := database.InitDB()
+	db, err := models.InitDB()
 	if err != nil {
 		log.Fatalf("Failed to initialize database: %v", err)
 	}
