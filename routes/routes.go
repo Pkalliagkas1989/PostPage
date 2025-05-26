@@ -6,14 +6,14 @@ import (
 
 	"forum/handlers"
 	"forum/middleware"
-	"forum/models"
+	"forum/repository"
 )
 
 // SetupRoutes configures all routes for the application
 func SetupRoutes(db *sql.DB) http.Handler {
 	// Create repositories
-	userRepo := models.NewUserRepository(db)
-	sessionRepo := models.NewSessionRepository(db)
+	userRepo := repository.NewUserRepository(db)
+	sessionRepo := repository.NewSessionRepository(db)
 
 	// Create handlers
 	authHandler := handlers.NewAuthHandler(userRepo, sessionRepo)

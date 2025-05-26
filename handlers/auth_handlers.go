@@ -5,16 +5,17 @@ import (
 	"net/http"
 
 	"forum/models"
+	"forum/repository"
 )
 
 // AuthHandler handles authentication-related requests
 type AuthHandler struct {
-	UserRepo    *models.UserRepository
-	SessionRepo *models.SessionRepository
+	UserRepo    *repository.UserRepository
+	SessionRepo *repository.SessionRepository
 }
 
 // NewAuthHandler creates a new AuthHandler
-func NewAuthHandler(userRepo *models.UserRepository, sessionRepo *models.SessionRepository) *AuthHandler {
+func NewAuthHandler(userRepo *repository.UserRepository, sessionRepo *repository.SessionRepository) *AuthHandler {
 	return &AuthHandler{
 		UserRepo:    userRepo,
 		SessionRepo: sessionRepo,
@@ -52,9 +53,9 @@ func (h *AuthHandler) Register(w http.ResponseWriter, r *http.Request) {
 	user, err := h.UserRepo.Create(reg)
 	if err != nil {
 		switch err {
-		case models.ErrEmailTaken:
+		case repository.ErrEmailTaken:
 			http.Error(w, "Email is already taken", http.StatusConflict)
-		case models.ErrUsernameTaken:
+		case repository.ErrUsernameTaken:
 			http.Error(w, "Username is already taken", http.StatusConflict)
 		default:
 			http.Error(w, "Internal server error", http.StatusInternalServerError)
@@ -93,7 +94,7 @@ func (h *AuthHandler) Login(w http.ResponseWriter, r *http.Request) {
 	// Authenticate user
 	user, err := h.UserRepo.Authenticate(login)
 	if err != nil {
-		if err == models.ErrInvalidCredentials {
+		if err == repository.ErrInvalidCredentials {
 			http.Error(w, "Invalid email or password", http.StatusUnauthorized)
 		} else {
 			http.Error(w, "Internal server error", http.StatusInternalServerError)

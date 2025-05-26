@@ -5,16 +5,17 @@ import (
 	"net/http"
 
 	"forum/models"
+	"forum/repository"
 )
 
 // Authentication middleware checks if the user is authenticated
 type AuthMiddleware struct {
-	SessionRepo *models.SessionRepository
-	UserRepo    *models.UserRepository
+	SessionRepo *repository.SessionRepository
+	UserRepo    *repository.UserRepository
 }
 
 // NewAuthMiddleware creates a new AuthMiddleware
-func NewAuthMiddleware(sessionRepo *models.SessionRepository, userRepo *models.UserRepository) *AuthMiddleware {
+func NewAuthMiddleware(sessionRepo *repository.SessionRepository, userRepo *repository.UserRepository) *AuthMiddleware {
 	return &AuthMiddleware{
 		SessionRepo: sessionRepo,
 		UserRepo:    userRepo,
