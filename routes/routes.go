@@ -25,9 +25,9 @@ func SetupRoutes(db *sql.DB) http.Handler {
 	mux := http.NewServeMux()
 
 	// Define auth routes
-	mux.HandleFunc("/api/auth/register", authHandler.Register)
-	mux.HandleFunc("/api/auth/login", authHandler.Login)
-	mux.HandleFunc("/api/auth/logout", authHandler.Logout)
+	mux.HandleFunc("/forum/api/auth/register", authHandler.Register)
+	mux.HandleFunc("/forum/api/auth/login", authHandler.Login)
+	mux.HandleFunc("/forum/api/auth/logout", authHandler.Logout)
 
 	// Apply middleware to all routes
 	return authMiddleware.Authenticate(mux)
