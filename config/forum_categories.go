@@ -4,7 +4,7 @@ package config
 import ()
 
 var Categories = []string{
-	"GeneralLLLL",
+	"General",
 	"Software Development",
 	"Hobbies",
 	"Random",
