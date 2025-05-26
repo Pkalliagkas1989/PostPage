@@ -1,12 +1,16 @@
 // Define the categories to add
-package models
+package config
 
 import ()
 
 var Categories = []string{
-	"General",
+	"GeneralLLLL",
 	"Software Development",
 	"Hobbies",
 	"Random",
 	"Pets",
+}
+
+var NewCategories = []string{
+	"Gaming",
 }
