@@ -24,6 +24,8 @@ func SetupRoutes(db *sql.DB) http.Handler {
 	authHandler := handlers.NewAuthHandler(userRepo, sessionRepo)
 
 	// Create middleware
+	registerLimiter := middleware.NewRateLimiter()
+
 	authMiddleware := middleware.NewAuthMiddleware(sessionRepo, userRepo)	
 
 	guestHandler := handlers.NewGuestHandler(categoryRepo, postRepo, commentRepo, reactionRepo)
@@ -33,7 +35,7 @@ func SetupRoutes(db *sql.DB) http.Handler {
 
 	// Define auth routes
 	mux.HandleFunc("/forum/api/guest", guestHandler.GetGuestData)
-	mux.HandleFunc("/forum/api/register", authHandler.Register)
+	mux.HandleFunc("/forum/api/register", registerLimiter.Limit(authHandler.Register))
 	mux.HandleFunc("/forum/api/session/login", authHandler.Login)
 	mux.HandleFunc("/forum/api/session/logout", authHandler.Logout)
 
