@@ -26,15 +26,15 @@ func SetupRoutes(db *sql.DB) http.Handler {
 	// Create middleware
 	registerLimiter := middleware.NewRateLimiter()
 
-	authMiddleware := middleware.NewAuthMiddleware(sessionRepo, userRepo)	
-
+	authMiddleware := middleware.NewAuthMiddleware(sessionRepo, userRepo)
 	guestHandler := handlers.NewGuestHandler(categoryRepo, postRepo, commentRepo, reactionRepo)
+	corsMiddleware := middleware.NewCORSMiddleware("http://localhost:8081")
 
 	// Create router (using standard net/http for simplicity)
 	mux := http.NewServeMux()
 
 	// Define auth routes
-	mux.HandleFunc("/forum/api/guest", guestHandler.GetGuestData)
+	mux.Handle("/forum/api/guest", corsMiddleware.Handler(http.HandlerFunc(guestHandler.GetGuestData)))
 	mux.HandleFunc("/forum/api/register", registerLimiter.Limit(authHandler.Register))
 	mux.HandleFunc("/forum/api/session/login", authHandler.Login)
 	mux.HandleFunc("/forum/api/session/logout", authHandler.Logout)
