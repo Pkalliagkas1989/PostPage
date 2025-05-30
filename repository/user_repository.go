@@ -56,11 +56,11 @@ func (r *UserRepository) Create(reg models.UserRegistration) (*models.User, erro
 
 	// Generate UUID for the user
 	userID := utils.GenerateUUID()
-
+	createdAt := time.Now()
 	// Insert user record
 	_, err = tx.Exec(
 		"INSERT INTO user (user_id, username, email, created_at) VALUES (?, ?, ?, ?)",
-		userID, reg.Username, reg.Email, time.Now(),
+		userID, reg.Username, reg.Email, createdAt,
 	)
 	if err != nil {
 		return nil, err
@@ -91,7 +91,7 @@ func (r *UserRepository) Create(reg models.UserRegistration) (*models.User, erro
 		ID:        userID,
 		Username:  reg.Username,
 		Email:     reg.Email,
-		CreatedAt: time.Now(),
+		CreatedAt: createdAt,
 	}
 
 	return user, nil
