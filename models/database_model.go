@@ -176,7 +176,7 @@ func InsertMockData(db *sql.DB) error {
 	}
 
 	categories := map[string]int{
-		"GeneralLLLL":          1,
+		"General":          1,
 		"Software Development": 2,
 		"Hobbies":              3,
 		"Random":               4,

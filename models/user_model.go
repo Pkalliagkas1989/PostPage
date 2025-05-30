@@ -46,38 +46,9 @@ type LoginResponse struct {
 	SessionID string `json:"session_id"`
 }
 
-// Category represents a discussion category
-type Category struct {
-	ID   int    `json:"id"`
-	Name string `json:"name"`
-}
 
-// PostWithUser is a post along with the username of its author
-type PostWithUser struct {
-	ID         string    `json:"id"`
-	UserID     string    `json:"user_id"`
-	Username   string    `json:"username"`
-	CategoryID int       `json:"category_id"`
-	Content    string    `json:"content"`
-	CreatedAt  time.Time `json:"created_at"`
-}
 
-// CommentWithUser is a comment along with the username of its author
-type CommentWithUser struct {
-	ID        string    `json:"id"`
-	PostID    string    `json:"post_id"`
-	UserID    string    `json:"user_id"`
-	Username  string    `json:"username"`
-	Content   string    `json:"content"`
-	CreatedAt time.Time `json:"created_at"`
-}
 
-// ReactionWithUser is a reaction along with the username of the user who reacted
-type ReactionWithUser struct {
-	UserID       string    `json:"user_id"`
-	Username     string    `json:"username"`
-	ReactionType int       `json:"reaction_type"`
-	PostID       *string   `json:"post_id,omitempty"`
-	CommentID    *string   `json:"comment_id,omitempty"`
-	CreatedAt    time.Time `json:"created_at"`
-}
+
+
+
