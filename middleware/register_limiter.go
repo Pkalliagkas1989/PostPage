@@ -3,7 +3,6 @@ package middleware
 import (
 	"net"
 	"net/http"
-	"strings"
 	"sync"
 	"time"
 )
@@ -79,14 +78,9 @@ func (rl *RateLimiter) Limit(next http.HandlerFunc) http.HandlerFunc {
 
 // Get client IP from headers or remote addr
 func getRealIP(r *http.Request) string {
-	hdr := r.Header.Get("X-Forwarded-For")
-	if hdr != "" {
-		parts := strings.Split(hdr, ",")
-		return strings.TrimSpace(parts[0])
-	}
 	ip, _, err := net.SplitHostPort(r.RemoteAddr)
 	if err != nil {
-		return r.RemoteAddr
+		return r.RemoteAddr // fallback
 	}
 	return ip
 }
