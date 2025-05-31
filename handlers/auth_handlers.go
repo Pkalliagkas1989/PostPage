@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"encoding/json"
+	"log"
 	"net/http"
 	"net/mail"
 	"strings"
@@ -131,7 +132,9 @@ func (h *AuthHandler) Login(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Create a new session
+	log.Println("Creating session for user:", user.ID)
 	session, err := h.SessionRepo.Create(user.ID, r.RemoteAddr)
+	log.Println("Session created:", session)
 	if err != nil {
 		http.Error(w, "Failed to create session", http.StatusInternalServerError)
 		return
