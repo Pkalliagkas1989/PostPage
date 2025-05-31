@@ -25,7 +25,6 @@ func SetupRoutes(db *sql.DB) http.Handler {
 
 	// Create middleware
 	registerLimiter := middleware.NewRateLimiter()
-
 	authMiddleware := middleware.NewAuthMiddleware(sessionRepo, userRepo)
 	guestHandler := handlers.NewGuestHandler(categoryRepo, postRepo, commentRepo, reactionRepo)
 	corsMiddleware := middleware.NewCORSMiddleware("http://localhost:8081")

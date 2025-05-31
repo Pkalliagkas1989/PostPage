@@ -51,20 +51,17 @@ func (h *AuthHandler) Register(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	
 	if !utils.UsernameRegex.MatchString(reg.Username) {
 		utils.ErrorResponse(w, "Username must be 3-50 characters, letters/numbers/underscores only", http.StatusBadRequest)
 		return
 	}
 
-	
 	_, err = mail.ParseAddress(reg.Email)
 	if err != nil {
 		utils.ErrorResponse(w, "Invalid email format", http.StatusBadRequest)
 		return
 	}
 
-	
 	if len(reg.Password) < 8 {
 		utils.ErrorResponse(w, "Password must be at least 8 characters long", http.StatusBadRequest)
 		return
@@ -123,6 +120,7 @@ func (h *AuthHandler) Login(w http.ResponseWriter, r *http.Request) {
 
 	// Authenticate user
 	user, err := h.UserRepo.Authenticate(login)
+
 	if err != nil {
 		if err == repository.ErrInvalidCredentials {
 			http.Error(w, "Invalid email or password", http.StatusUnauthorized)

@@ -3,6 +3,7 @@ package repository
 import (
 	"database/sql"
 	"errors"
+	"fmt"
 	"time"
 
 	"forum/models"
@@ -100,12 +101,13 @@ func (r *UserRepository) Create(reg models.UserRegistration) (*models.User, erro
 // GetByEmail retrieves a user by email
 func (r *UserRepository) GetByEmail(email string) (*models.User, error) {
 	var user models.User
-	var timestamp string
+	//var timestamp string
+	var createdAt time.Time
 
 	err := r.DB.QueryRow(
 		"SELECT user_id, username, email, created_at FROM user WHERE email = ?",
 		email,
-	).Scan(&user.ID, &user.Username, &user.Email, &timestamp)
+	).Scan(&user.ID, &user.Username, &user.Email, &createdAt)
 
 	if err != nil {
 		if err == sql.ErrNoRows {
@@ -115,7 +117,8 @@ func (r *UserRepository) GetByEmail(email string) (*models.User, error) {
 	}
 
 	// Parse the timestamp
-	user.CreatedAt, err = time.Parse("2006-01-02 15:04:05", timestamp)
+	user.CreatedAt = createdAt
+	//user.CreatedAt, err = time.Parse("2006-01-02 15:04:05.999999999-07:00", timestamp)
 	if err != nil {
 		return nil, err
 	}
@@ -126,12 +129,12 @@ func (r *UserRepository) GetByEmail(email string) (*models.User, error) {
 // GetByID retrieves a user by ID
 func (r *UserRepository) GetByID(id string) (*models.User, error) {
 	var user models.User
-	var timestamp string
-
+	//var timestamp string
+	var createdAt time.Time
 	err := r.DB.QueryRow(
 		"SELECT user_id, username, email, created_at FROM user WHERE user_id = ?",
 		id,
-	).Scan(&user.ID, &user.Username, &user.Email, &timestamp)
+	).Scan(&user.ID, &user.Username, &user.Email, &createdAt)
 
 	if err != nil {
 		if err == sql.ErrNoRows {
@@ -139,9 +142,9 @@ func (r *UserRepository) GetByID(id string) (*models.User, error) {
 		}
 		return nil, err
 	}
-
+	user.CreatedAt = createdAt
 	// Parse the timestamp
-	user.CreatedAt, err = time.Parse("2006-01-02 15:04:05", timestamp)
+	//user.CreatedAt, err = time.Parse("2006-01-02 15:04:05.999999999-07:00", timestamp)
 	if err != nil {
 		return nil, err
 	}
@@ -171,16 +174,21 @@ func (r *UserRepository) GetAuthByUserID(userID string) (*models.UserAuth, error
 // Authenticate validates a user's login credentials
 func (r *UserRepository) Authenticate(login models.UserLogin) (*models.User, error) {
 	// Get the user by email
+	fmt.Println(login.Email)
 	user, err := r.GetByEmail(login.Email)
 	if err != nil {
+		fmt.Println("User email not found")
 		return nil, ErrInvalidCredentials
 	}
 
 	// Get the user's authentication data
 	auth, err := r.GetAuthByUserID(user.ID)
 	if err != nil {
+		fmt.Println("Auth record not found")
 		return nil, err
 	}
+	fmt.Println("Stored hash:", auth.PasswordHash)
+	fmt.Println("Password match?", utils.CheckPasswordHash(login.Password, auth.PasswordHash))
 
 	// Check the password
 	if !utils.CheckPasswordHash(login.Password, auth.PasswordHash) {
