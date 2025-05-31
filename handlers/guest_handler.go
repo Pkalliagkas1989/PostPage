@@ -1,8 +1,8 @@
 package handlers
 
 import (
-	"encoding/json"
 	"forum/repository"
+	"forum/utils"
 	"net/http"
 	"time"
 )
@@ -68,25 +68,26 @@ func NewGuestHandler(
 
 func (h *GuestHandler) GuestView(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodGet {
-		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+		//http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+		utils.ErrorResponse(w, "Only POST requests are allowed for registration.", http.StatusMethodNotAllowed)
 		return
 	}
 
 	posts, err := h.postRepo.GetAllPosts()
 	if err != nil {
-		http.Error(w, "Failed to fetch posts", http.StatusInternalServerError)
+		utils.ErrorResponse(w, "Failed to fetch posts.", http.StatusInternalServerError)
 		return
 	}
 
 	comments, err := h.commentRepo.GetAllComments()
 	if err != nil {
-		http.Error(w, "Failed to fetch comments", http.StatusInternalServerError)
+		utils.ErrorResponse(w, "Failed to fetch comments.", http.StatusInternalServerError)
 		return
 	}
 
 	reactions, err := h.reactionRepo.GetAllReactions()
 	if err != nil {
-		http.Error(w, "Failed to fetch reactions", http.StatusInternalServerError)
+		utils.ErrorResponse(w, "Failed to fetch reactions.", http.StatusInternalServerError)
 		return
 	}
 
@@ -97,18 +98,18 @@ func (h *GuestHandler) GuestView(w http.ResponseWriter, r *http.Request) {
 	}
 
 	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(response)
+	utils.JSONResponse(w, response, http.StatusOK)
 }
 
 func (h *GuestHandler) GetGuestData(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodGet {
-		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+		utils.ErrorResponse(w, "Method not allowed", http.StatusMethodNotAllowed)
 		return
 	}
 
 	categories, err := h.categoryRepo.GetAll()
 	if err != nil {
-		http.Error(w, "Failed to load categories", http.StatusInternalServerError)
+		utils.ErrorResponse(w, "Failed to load categories", http.StatusInternalServerError)
 		return
 	}
 
@@ -122,7 +123,7 @@ func (h *GuestHandler) GetGuestData(w http.ResponseWriter, r *http.Request) {
 
 		posts, err := h.postRepo.GetPostsByCategoryWithUser(cat.ID)
 		if err != nil {
-			http.Error(w, "Failed to load posts", http.StatusInternalServerError)
+			utils.ErrorResponse(w, "Failed to load posts", http.StatusInternalServerError)
 			return
 		}
 
@@ -141,7 +142,7 @@ func (h *GuestHandler) GetGuestData(w http.ResponseWriter, r *http.Request) {
 
 			comments, err := h.commentRepo.GetCommentsByPostWithUser(post.ID)
 			if err != nil {
-				http.Error(w, "Failed to load comments", http.StatusInternalServerError)
+				utils.ErrorResponse(w, "Failed to load comments", http.StatusInternalServerError)
 				return
 			}
 
@@ -157,7 +158,7 @@ func (h *GuestHandler) GetGuestData(w http.ResponseWriter, r *http.Request) {
 
 				reactions, err := h.reactionRepo.GetReactionsByCommentWithUser(comment.ID)
 				if err != nil {
-					http.Error(w, "Failed to load reactions", http.StatusInternalServerError)
+					utils.ErrorResponse(w, "Failed to load reactions", http.StatusInternalServerError)
 					return
 				}
 				for _, reaction := range reactions {
@@ -174,7 +175,7 @@ func (h *GuestHandler) GetGuestData(w http.ResponseWriter, r *http.Request) {
 
 			reactions, err := h.reactionRepo.GetReactionsByPostWithUser(post.ID)
 			if err != nil {
-				http.Error(w, "Failed to load reactions", http.StatusInternalServerError)
+				utils.ErrorResponse(w, "Failed to load reactions", http.StatusInternalServerError)
 				return
 			}
 			for _, reaction := range reactions {
@@ -192,6 +193,5 @@ func (h *GuestHandler) GetGuestData(w http.ResponseWriter, r *http.Request) {
 		response.Categories = append(response.Categories, catResp)
 	}
 
-	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(response)
+	utils.JSONResponse(w, response, http.StatusOK)
 }
