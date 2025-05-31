@@ -75,12 +75,12 @@ func (r *SessionRepository) GetBySessionID(sessionID string) (*models.Session, e
 	}
 
 	// Parse timestamps
-	session.CreatedAt, err = time.Parse("2006-01-02 15:04:05", createdStr)
+	session.CreatedAt, err = time.Parse(time.RFC3339, createdStr)
 	if err != nil {
 		return nil, err
 	}
 
-	session.ExpiresAt, err = time.Parse("2006-01-02 15:04:05", expiresStr)
+	session.ExpiresAt, err = time.Parse(time.RFC3339, expiresStr)
 	if err != nil {
 		return nil, err
 	}

@@ -194,3 +194,27 @@ func (h *AuthHandler) Logout(w http.ResponseWriter, r *http.Request) {
 
 	w.WriteHeader(http.StatusOK)
 }
+
+// Inside AuthHandler
+func (h *AuthHandler) VerifySession(w http.ResponseWriter, r *http.Request) {
+	sessionCookie, err := r.Cookie("session_id")
+	if err != nil {
+		http.Error(w, "Not authenticated", http.StatusUnauthorized)
+		return
+	}
+
+	session, err := h.SessionRepo.GetBySessionID(sessionCookie.Value)
+	if err != nil {
+		http.Error(w, "Session invalid or expired", http.StatusUnauthorized)
+		return
+	}
+
+	// Optionally fetch user and return profile
+	user, err := h.UserRepo.GetByID(session.UserID)
+	if err != nil {
+		http.Error(w, "User not found", http.StatusInternalServerError)
+		return
+	}
+
+	utils.JSONResponse(w, user, http.StatusOK)
+}

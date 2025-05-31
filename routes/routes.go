@@ -37,6 +37,7 @@ func SetupRoutes(db *sql.DB) http.Handler {
 	mux.HandleFunc("/forum/api/register", registerLimiter.Limit(authHandler.Register))
 	mux.HandleFunc("/forum/api/session/login", authHandler.Login)
 	mux.HandleFunc("/forum/api/session/logout", authHandler.Logout)
+	mux.HandleFunc("/forum/api/session/verify", authHandler.VerifySession)
 
 	// Apply middleware to all routes
 	return authMiddleware.Authenticate(mux)
