@@ -1,11 +1,15 @@
 package middleware
 
 import (
+	"forum/utils"
 	"net"
 	"net/http"
 	"sync"
 	"time"
 )
+
+var restrict = time.Duration(1)
+var coolDown = time.Duration(1)
 
 type rateInfo struct {
 	lastAttempt     time.Time
@@ -26,7 +30,7 @@ func NewRateLimiter() *RateLimiter {
 	// Periodic cleanup
 	go func() {
 		for {
-			time.Sleep(10 * time.Minute)
+			time.Sleep(restrict * time.Minute)
 			rl.cleanup()
 		}
 	}()
@@ -49,13 +53,13 @@ func (rl *RateLimiter) Limit(next http.HandlerFunc) http.HandlerFunc {
 
 		if info.successfulUntil.After(now) {
 			rl.mu.Unlock()
-			http.Error(w, "Too many registrations from this IP. Please wait 10 minutes.", http.StatusTooManyRequests)
+			utils.ErrorResponse(w, "Too many registrations from this IP. Please wait " + restrict.String() + " minutes.", http.StatusTooManyRequests)
 			return
 		}
 
-		if info.lastAttempt.Add(20 * time.Second).After(now) {
+		if info.lastAttempt.Add(coolDown * time.Second).After(now) {
 			rl.mu.Unlock()
-			http.Error(w, "Please wait 20 seconds before trying again.", http.StatusTooManyRequests)
+			utils.ErrorResponse(w, "Please wait " + coolDown.String() + " seconds before trying again.", http.StatusTooManyRequests)
 			return
 		}
 
@@ -70,7 +74,7 @@ func (rl *RateLimiter) Limit(next http.HandlerFunc) http.HandlerFunc {
 		// On successful registration (HTTP 201), lock IP for 10 mins
 		if rr.statusCode == http.StatusCreated {
 			rl.mu.Lock()
-			info.successfulUntil = time.Now().Add(10 * time.Minute)
+			info.successfulUntil = time.Now().Add(restrict * time.Minute)
 			rl.mu.Unlock()
 		}
 	}
@@ -103,8 +107,8 @@ func (rl *RateLimiter) cleanup() {
 
 	now := time.Now()
 	for ip, info := range rl.clients {
-		if info.successfulUntil.Before(now.Add(-10*time.Minute)) &&
-			info.lastAttempt.Before(now.Add(-10*time.Minute)) {
+		if info.successfulUntil.Before(now.Add(-restrict*time.Minute)) &&
+			info.lastAttempt.Before(now.Add(-restrict*time.Minute)) {
 			delete(rl.clients, ip)
 		}
 	}

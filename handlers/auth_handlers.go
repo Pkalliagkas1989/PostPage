@@ -29,7 +29,7 @@ func NewAuthHandler(userRepo *repository.UserRepository, sessionRepo *repository
 func (h *AuthHandler) Register(w http.ResponseWriter, r *http.Request) {
 	// Only allow POST requests
 	if r.Method != http.MethodPost {
-		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+		utils.ErrorResponse(w, "Method not allowed", http.StatusMethodNotAllowed)
 		return
 	}
 
@@ -37,7 +37,7 @@ func (h *AuthHandler) Register(w http.ResponseWriter, r *http.Request) {
 	var reg models.UserRegistration
 	err := json.NewDecoder(r.Body).Decode(&reg)
 	if err != nil {
-		http.Error(w, "Invalid request body", http.StatusBadRequest)
+		utils.ErrorResponse(w, "Invalid request body", http.StatusBadRequest)
 		return
 	}
 
@@ -47,33 +47,33 @@ func (h *AuthHandler) Register(w http.ResponseWriter, r *http.Request) {
 
 	// Validate request
 	if reg.Username == "" || reg.Email == "" || reg.Password == "" {
-		http.Error(w, "Username, email, and password are required", http.StatusBadRequest)
+		utils.ErrorResponse(w, "Username, email, and password are required", http.StatusBadRequest)
 		return
 	}
 
 	
 	if !utils.UsernameRegex.MatchString(reg.Username) {
-		http.Error(w, "Username must be 3-50 characters, letters/numbers/underscores only", http.StatusBadRequest)
+		utils.ErrorResponse(w, "Username must be 3-50 characters, letters/numbers/underscores only", http.StatusBadRequest)
 		return
 	}
 
 	
 	_, err = mail.ParseAddress(reg.Email)
 	if err != nil {
-		http.Error(w, "Invalid email format", http.StatusBadRequest)
+		utils.ErrorResponse(w, "Invalid email format", http.StatusBadRequest)
 		return
 	}
 
 	
 	if len(reg.Password) < 8 {
-		http.Error(w, "Password must be at least 8 characters long", http.StatusBadRequest)
+		utils.ErrorResponse(w, "Password must be at least 8 characters long", http.StatusBadRequest)
 		return
 	}
 
 	// Optional: Strength (at least 1 digit, 1 letter)
 
 	if !utils.IsStrongPassword(reg.Password) {
-		http.Error(w, "Password must contain letters and numbers", http.StatusBadRequest)
+		utils.ErrorResponse(w, "Password must contain letters and numbers", http.StatusBadRequest)
 		return
 	}
 
@@ -82,21 +82,21 @@ func (h *AuthHandler) Register(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		switch err {
 		case repository.ErrEmailTaken:
-			http.Error(w, "Email is already taken", http.StatusConflict)
+			utils.ErrorResponse(w, "Email is already taken", http.StatusConflict)
 		case repository.ErrUsernameTaken:
-			http.Error(w, "Username is already taken", http.StatusConflict)
+			utils.ErrorResponse(w, "Username is already taken", http.StatusConflict)
 		default:
-			http.Error(w, "Internal server error", http.StatusInternalServerError)
+			utils.ErrorResponse(w, "Internal server error", http.StatusInternalServerError)
 		}
 		return
 	}
 
-	// Return response
-	utils.JSONResponse(w, map[string]interface{}{
+	response := map[string]interface{}{
 		"id":       user.ID,
 		"username": user.Username,
 		"email":    user.Email,
-	}, http.StatusCreated)
+	}
+	utils.JSONResponse(w, response, http.StatusCreated)
 }
 
 // Login handles user login
