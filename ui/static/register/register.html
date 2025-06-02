@@ -13,17 +13,6 @@
           <p id="heading">Register</p>
 
           <div class="field">
-            <svg
-              class="input-icon"
-              viewBox="0 0 24 24"
-              fill="currentColor"
-              height="16"
-              width="16"
-            >
-              <path
-                d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4S8 5.79 8 8s1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"
-              />
-            </svg>
             <input
               type="text"
               class="input-field"
@@ -35,15 +24,6 @@
           </div>
 
           <div class="field">
-            <svg
-              class="input-icon"
-              viewBox="0 0 16 16"
-              fill="currentColor"
-              height="16"
-              width="16"
-            >
-              <path d="..." />
-            </svg>
             <input
               type="email"
               class="input-field"
@@ -55,15 +35,6 @@
           </div>
 
           <div class="field">
-            <svg
-              class="input-icon"
-              viewBox="0 0 16 16"
-              fill="currentColor"
-              height="16"
-              width="16"
-            >
-              <path d="..." />
-            </svg>
             <input
               type="password"
               class="input-field"
@@ -74,15 +45,6 @@
           </div>
 
           <div class="field">
-            <svg
-              class="input-icon"
-              viewBox="0 0 16 16"
-              fill="currentColor"
-              height="16"
-              width="16"
-            >
-              <path d="..." />
-            </svg>
             <input
               type="password"
               class="input-field"
@@ -96,9 +58,9 @@
             <button class="button1" type="submit">
               &nbsp;&nbsp;&nbsp;&nbsp;Register&nbsp;&nbsp;&nbsp;&nbsp;
             </button>
-            <a href="login.html"
-              ><button type="button" class="button2">Login</button></a
-            >
+            <a href="login.html">
+              <button type="button" class="button2">Login</button>
+            </a>
           </div>
 
           <button class="button3" type="button">Need Help?</button>
@@ -108,50 +70,46 @@
     </div>
 
     <script>
-      document
-        .getElementById("registerForm")
-        .addEventListener("submit", async function (e) {
-          e.preventDefault();
+      document.getElementById("registerForm").addEventListener("submit", async function (e) {
+        e.preventDefault();
 
-          const username = document.getElementById("username").value;
-          const email = document.getElementById("email").value;
-          const password = document.getElementById("password").value;
-          const confirmPassword =
-            document.getElementById("confirmPassword").value;
-          const message = document.getElementById("message");
+        const username = document.getElementById("username").value.trim();
+        const email = document.getElementById("email").value.trim();
+        const password = document.getElementById("password").value;
+        const confirmPassword = document.getElementById("confirmPassword").value;
+        const message = document.getElementById("message");
 
-          message.textContent = "";
-          message.style.color = "red";
+        message.textContent = "";
+        message.style.color = "red";
 
-          if (password !== confirmPassword) {
-            message.textContent = "Passwords do not match!";
-            return;
+        if (password !== confirmPassword) {
+          message.textContent = "Passwords do not match!";
+          return;
+        }
+
+        try {
+          const res = await fetch("http://localhost:8080/forum/api/register", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({ username, email, password }),
+          });
+
+          const resBody = await res.text();
+
+          if (!res.ok) {
+            throw new Error(resBody || "Registration failed");
           }
 
-          try {
-            const res = await fetch(
-              "http://localhost:8080/forum/api/register",
-              {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ username, email, password }),
-              }
-            );
-
-            if (!res.ok) {
-              const errText = await res.text();
-              throw new Error(errText);
-            }
-
-            const result = await res.json();
-            message.style.color = "green";
-            message.textContent = "Registration successful!";
-            // optionally redirect to login page:
-            // window.location.href = "login.html";
-          } catch (err) {
-            message.textContent = "Error: " + err.message;
-          }
-        });
+          message.style.color = "green";
+          message.textContent = "Registration successful!";
+          // Optionally redirect
+          // setTimeout(() => window.location.href = "login.html", 1500);
+        } catch (err) {
+          message.textContent = "Error: " + err.message;
+        }
+      });
     </script>
   </body>
 </html>

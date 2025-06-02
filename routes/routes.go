@@ -34,8 +34,8 @@ func SetupRoutes(db *sql.DB) http.Handler {
 
 	// Define auth routes
 	mux.Handle("/forum/api/guest", corsMiddleware.Handler(http.HandlerFunc(guestHandler.GetGuestData)))
-	mux.HandleFunc("/forum/api/register", registerLimiter.Limit(authHandler.Register))
-	mux.HandleFunc("/forum/api/session/login", authHandler.Login)
+	mux.Handle("/forum/api/register", corsMiddleware.Handler(http.HandlerFunc(registerLimiter.Limit(authHandler.Register))))
+	mux.HandleFunc("/forum/api/session/login", corsMiddleware.Handler(http.HandlerFunc(authHandler.Login))))
 	mux.HandleFunc("/forum/api/session/logout", authHandler.Logout)
 	mux.HandleFunc("/forum/api/session/verify", authHandler.VerifySession)
 
