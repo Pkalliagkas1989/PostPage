@@ -6,16 +6,19 @@ import (
 )
 
 func main() {
-	fs := http.FileServer(http.Dir("./static"))
-	http.Handle("/", fs)
+	// Serve index.html at root
+	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+		http.ServeFile(w, r, "./ui/templates/index.html")
+	})
 
-	// Start the server on port 8081
+	// Serve static files
+	fs := http.FileServer(http.Dir("./ui"))
+	http.Handle("/ui/", http.StripPrefix("/ui/", fs))
+
+	// Start the server
 	log.Println("Serving on http://localhost:8081/")
 	err := http.ListenAndServe(":8081", nil)
 	if err != nil {
 		log.Fatal(err)
 	}
-
-
 }
-
