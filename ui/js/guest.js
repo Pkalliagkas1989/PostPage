@@ -1,10 +1,3 @@
-const burger = document.getElementById("burger");
-const sideMenu = document.getElementById("side-menu");
-
-burger.addEventListener("click", () => {
-  sideMenu.classList.toggle("active");
-});
-
 document.addEventListener("DOMContentLoaded", async () => {
   try {
     const response = await fetch("http://localhost:8080/forum/api/guest");
