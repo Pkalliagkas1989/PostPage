@@ -1,3 +1,14 @@
+const isAuthenticated = false;
+
+// Show or hide elements based on authentication
+document.querySelectorAll(".auth-only").forEach((el) => {
+  el.style.display = isAuthenticated ? "list-item" : "none";
+});
+
+document.querySelectorAll(".guest-only").forEach((el) => {
+  el.style.display = isAuthenticated ? "none" : "list-item";
+});
+
 document.addEventListener("DOMContentLoaded", async () => {
   try {
     const response = await fetch("http://localhost:8080/forum/api/guest");
