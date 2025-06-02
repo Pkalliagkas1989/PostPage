@@ -6,19 +6,27 @@ import (
 )
 
 func main() {
-	// Serve index.html at root
-	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-		http.ServeFile(w, r, "./ui/templates/index.html")
-	})
+	// Serve static assets (css, js, images)
+	fs := http.FileServer(http.Dir("./static"))
+	http.Handle("/static/", http.StripPrefix("/static/", fs))
 
-	// Serve static files
-	fs := http.FileServer(http.Dir("./ui"))
-	http.Handle("/ui/", http.StripPrefix("/ui/", fs))
+	// Serve individual HTML pages
+	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+		http.ServeFile(w, r, "./static/templates/index.html")
+	})
+	http.HandleFunc("/login", func(w http.ResponseWriter, r *http.Request) {
+		http.ServeFile(w, r, "./static/templates/login.html")
+	})
+	http.HandleFunc("/register", func(w http.ResponseWriter, r *http.Request) {
+		http.ServeFile(w, r, "./static/templates/register.html")
+	})
+	http.HandleFunc("/guest", func(w http.ResponseWriter, r *http.Request) {
+		http.ServeFile(w, r, "./static/templates/guest.html")
+	})
 
 	// Start the server
 	log.Println("Serving on http://localhost:8081/")
-	err := http.ListenAndServe(":8081", nil)
-	if err != nil {
+	if err := http.ListenAndServe(":8081", nil); err != nil {
 		log.Fatal(err)
 	}
 }
