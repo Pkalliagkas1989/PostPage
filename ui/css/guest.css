@@ -153,6 +153,10 @@
     font-weight: 600;
     display: block;
   }
+
+  .auth-only {
+    display: none;
+  }  
   
   .forum-content {
     width: 100%;
@@ -177,6 +181,10 @@
     margin-bottom: 1em;
     border-bottom: 1px solid rgba(0, 255, 117, 0.2);
     padding-bottom: 0.5em;
+  }
+
+  .category-toggle {
+    color: var(--color-primary);
   }
   
   .post {
