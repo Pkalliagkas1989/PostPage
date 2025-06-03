@@ -1,5 +1,43 @@
+function countReactions(reactions = []) {
+  return {
+    likes: reactions.filter((r) => r.reaction_type === 1).length,
+    dislikes: reactions.filter((r) => r.reaction_type === 2).length,
+  };
+}
+
+async function handleReaction(
+  targetId,
+  targetType,
+  reactionType,
+  likeBtn,
+  dislikeBtn
+) {
+  try {
+    const res = await fetch("/api/react", {
+      method: "POST",
+      credentials: "include",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        target_id: targetId,
+        target_type: targetType,
+        reaction_type: reactionType,
+      }),
+    });
+
+    if (!res.ok) throw new Error("Failed to react");
+
+    const updatedReactions = await res.json();
+    const { likes, dislikes } = countReactions(updatedReactions);
+    likeBtn.querySelector(".like-count").textContent = likes;
+    dislikeBtn.querySelector(".dislike-count").textContent = dislikes;
+  } catch (err) {
+    console.error("Reaction failed:", err);
+  }
+}
+
 document.addEventListener("DOMContentLoaded", async () => {
-  // Session verification logic, only activate if NOT a guest
   const urlParams = new URLSearchParams(window.location.search);
   const isGuest = urlParams.get("guest") === "true";
 
@@ -12,13 +50,14 @@ document.addEventListener("DOMContentLoaded", async () => {
     isAuthenticated = authResponse.ok;
   }
 
+  // Show or hide auth-only and guest-only elements
   document.querySelectorAll(".auth-only").forEach((el) => {
     el.style.display = isAuthenticated ? "list-item" : "none";
   });
-
   document.querySelectorAll(".guest-only").forEach((el) => {
     el.style.display = isAuthenticated ? "none" : "list-item";
   });
+
   try {
     const response = await fetch("http://localhost:8080/forum/api/guest");
     if (!response.ok) throw new Error("Network response was not ok");
@@ -27,7 +66,10 @@ document.addEventListener("DOMContentLoaded", async () => {
     const forumContainer = document.getElementById("forumContainer");
     const categoryTabs = document.getElementById("category-tabs");
 
-    // Render category tab links
+    // Clear tabs container (if anything exists)
+    categoryTabs.innerHTML = "";
+
+    // Render category tabs
     data.categories.forEach((category, index) => {
       const tabItem = document.createElement("li");
       const link = document.createElement("a");
@@ -74,17 +116,90 @@ document.addEventListener("DOMContentLoaded", async () => {
           post.created_at
         ).toLocaleString();
 
+        // Post reactions
+        const { likes: postLikes, dislikes: postDislikes } = countReactions(
+          post.reactions || []
+        );
+        const postContainer = postElement.querySelector(".post");
+        const likeBtn = postContainer.querySelector(".like-btn");
+        const dislikeBtn = postContainer.querySelector(".dislike-btn");
+
+        likeBtn.querySelector(".like-count").textContent = postLikes;
+        dislikeBtn.querySelector(".dislike-count").textContent = postDislikes;
+
+        // Disable buttons by default for guests
+        likeBtn.disabled = !isAuthenticated;
+        dislikeBtn.disabled = !isAuthenticated;
+
+        // Remove existing listeners to prevent duplicates
+        likeBtn.replaceWith(likeBtn.cloneNode(true));
+        dislikeBtn.replaceWith(dislikeBtn.cloneNode(true));
+        const newLikeBtn = postContainer.querySelector(".like-btn");
+        const newDislikeBtn = postContainer.querySelector(".dislike-btn");
+
+        if (isAuthenticated) {
+          newLikeBtn.addEventListener("click", () => {
+            handleReaction(post.id, "post", 1, newLikeBtn, newDislikeBtn);
+          });
+          newDislikeBtn.addEventListener("click", () => {
+            handleReaction(post.id, "post", 2, newLikeBtn, newDislikeBtn);
+          });
+        }
+
+        // Comments
         const commentsContainer = postElement.querySelector(".post-comments");
+        commentsContainer.innerHTML = ""; // Clear existing comments
 
         post.comments.forEach((comment) => {
           const commentElement = commentTemplate.content.cloneNode(true);
-          commentElement.querySelector(".comment-user").textContent =
+          const commentNode = commentElement.querySelector(".comment");
+          commentNode.querySelector(".comment-user").textContent =
             comment.username;
-          commentElement.querySelector(".comment-content").textContent =
+          commentNode.querySelector(".comment-content").textContent =
             comment.content;
-          commentElement.querySelector(".comment-time").textContent = new Date(
+          commentNode.querySelector(".comment-time").textContent = new Date(
             comment.created_at
           ).toLocaleString();
+
+          const { likes, dislikes } = countReactions(comment.reactions || []);
+          const commentLikeBtn = commentNode.querySelector(".like-btn");
+          const commentDislikeBtn = commentNode.querySelector(".dislike-btn");
+
+          commentLikeBtn.querySelector(".like-count").textContent = likes;
+          commentDislikeBtn.querySelector(".dislike-count").textContent =
+            dislikes;
+
+          commentLikeBtn.disabled = !isAuthenticated;
+          commentDislikeBtn.disabled = !isAuthenticated;
+
+          // Remove existing listeners to avoid duplicates
+          commentLikeBtn.replaceWith(commentLikeBtn.cloneNode(true));
+          commentDislikeBtn.replaceWith(commentDislikeBtn.cloneNode(true));
+          const newCommentLikeBtn = commentNode.querySelector(".like-btn");
+          const newCommentDislikeBtn =
+            commentNode.querySelector(".dislike-btn");
+
+          if (isAuthenticated) {
+            newCommentLikeBtn.addEventListener("click", () => {
+              handleReaction(
+                comment.id,
+                "comment",
+                1,
+                newCommentLikeBtn,
+                newCommentDislikeBtn
+              );
+            });
+            newCommentDislikeBtn.addEventListener("click", () => {
+              handleReaction(
+                comment.id,
+                "comment",
+                2,
+                newCommentLikeBtn,
+                newCommentDislikeBtn
+              );
+            });
+          }
+
           commentsContainer.appendChild(commentElement);
         });
 
