@@ -1,15 +1,24 @@
-const isAuthenticated = false;
-
-// Show or hide elements based on authentication
-document.querySelectorAll(".auth-only").forEach((el) => {
-  el.style.display = isAuthenticated ? "list-item" : "none";
-});
-
-document.querySelectorAll(".guest-only").forEach((el) => {
-  el.style.display = isAuthenticated ? "none" : "list-item";
-});
-
 document.addEventListener("DOMContentLoaded", async () => {
+  // Session verification logic, only activate if NOT a guest
+  const urlParams = new URLSearchParams(window.location.search);
+  const isGuest = urlParams.get("guest") === "true";
+
+  let isAuthenticated = false;
+  if (!isGuest) {
+    const authResponse = await fetch("/api/verify-session", {
+      method: "GET",
+      credentials: "include",
+    });
+    isAuthenticated = authResponse.ok;
+  }
+
+  document.querySelectorAll(".auth-only").forEach((el) => {
+    el.style.display = isAuthenticated ? "list-item" : "none";
+  });
+
+  document.querySelectorAll(".guest-only").forEach((el) => {
+    el.style.display = isAuthenticated ? "none" : "list-item";
+  });
   try {
     const response = await fetch("http://localhost:8080/forum/api/guest");
     if (!response.ok) throw new Error("Network response was not ok");
