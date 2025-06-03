@@ -99,6 +99,9 @@
             const result = await res.json();
             message.style.color = "green";
             message.textContent = "Login successful!";
+            setTimeout(() => {
+              window.location.href = "/guest"; // Change to actual route if needed
+            }, 1000);
             // Optionally redirect to dashboard
             // window.location.href = "/dashboard.html";
           } catch (err) {
