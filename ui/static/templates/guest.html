@@ -13,7 +13,9 @@
       <ul class="navbar-links">
         <li class="guest-only"><a href="/login">Login</a></li>
         <li class="guest-only"><a href="/register">Register</a></li>
+        <li class="auth-only"><a href="/new-post">New Post</a></li>
         <li class="auth-only"><a href="#">Logout</a></li>
+        <li class="auth-only" id="user-greeting"></li>
       </ul>
     </nav>
 
@@ -55,5 +57,20 @@
         <time class="comment-time"></time>
       </div>
     </template>
+    <script>
+      document.querySelectorAll('.auth-only').forEach(el => el.style.display = 'none');
+      document.querySelectorAll('.guest-only').forEach(el => el.style.display = 'none');
+      fetch("/api/verify-session", {
+        method: "GET",
+        credentials: "include",
+      })
+        .then(res => res.ok ? res.json() : null)
+        .then(user => {
+          if (user && user.username) {
+            const greeting = document.getElementById("user-greeting");
+            if (greeting) greeting.textContent = `Hello, ${user.username}!`;
+          }
+        });
+    </script>
   </body>
 </html>
