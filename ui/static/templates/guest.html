@@ -46,6 +46,14 @@
         <h3 class="post-header"></h3>
         <p class="post-content"></p>
         <time class="post-time"></time>
+        <div class="post-reactions">
+          <button class="like-btn" disabled>
+            👍 <span class="like-count">0</span>
+          </button>
+          <button class="dislike-btn" disabled>
+            👎 <span class="dislike-count">0</span>
+          </button>
+        </div>
         <div class="post-comments"></div>
       </div>
     </template>
@@ -55,22 +63,15 @@
         <strong class="comment-user"></strong>
         <span class="comment-content"></span>
         <time class="comment-time"></time>
+        <div class="comment-reactions">
+          <button class="like-btn" disabled>
+            👍 <span class="like-count">0</span>
+          </button>
+          <button class="dislike-btn" disabled>
+            👎 <span class="dislike-count">0</span>
+          </button>
+        </div>
       </div>
     </template>
-    <script>
-      document.querySelectorAll('.auth-only').forEach(el => el.style.display = 'none');
-      document.querySelectorAll('.guest-only').forEach(el => el.style.display = 'none');
-      fetch("/api/verify-session", {
-        method: "GET",
-        credentials: "include",
-      })
-        .then(res => res.ok ? res.json() : null)
-        .then(user => {
-          if (user && user.username) {
-            const greeting = document.getElementById("user-greeting");
-            if (greeting) greeting.textContent = `Hello, ${user.username}!`;
-          }
-        });
-    </script>
   </body>
 </html>
