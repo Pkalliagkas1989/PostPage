@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"log"
 	"net/http"
-	"net/mail"
 	"strings"
 
 	"forum/models"
@@ -52,19 +51,24 @@ func (h *AuthHandler) Register(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// Username: 3–50 chars, letters/numbers/underscores only
 	if !utils.UsernameRegex.MatchString(reg.Username) {
 		utils.ErrorResponse(w, "Username must be 3-50 characters, letters/numbers/underscores only", http.StatusBadRequest)
 		return
 	}
 
-	_, err = mail.ParseAddress(reg.Email)
+	// Email: trim, lowercase, parse, and enforce ending in .com
+	cleanEmail, err := utils.ValidateEmail(reg.Email)
 	if err != nil {
-		utils.ErrorResponse(w, "Invalid email format", http.StatusBadRequest)
+		// You might want to send err.Error() directly, since ValidateEmail already produces a user-friendly message.
+		utils.ErrorResponse(w, err.Error(), http.StatusBadRequest)
 		return
 	}
+	reg.Email = cleanEmail
 
-	if len(reg.Password) < 8 {
-		utils.ErrorResponse(w, "Password must be at least 8 characters long", http.StatusBadRequest)
+	// Password: at least 8 chars, at least one letter and one digit
+	if !utils.IsStrongPassword(reg.Password) {
+		utils.ErrorResponse(w, "Password must be at least 8 characters, with at least one letter and one digit", http.StatusBadRequest)
 		return
 	}
 
