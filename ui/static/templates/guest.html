@@ -11,23 +11,18 @@
     <nav class="navbar">
       <a class="navbar-brand" href="/">Forum</a>
       <ul class="navbar-links">
-        <li class="guest-only"><a href="/login">Login</a></li>
-        <li class="guest-only"><a href="/register">Register</a></li>
-        <li class="auth-only"><a href="/new-post">New Post</a></li>
-        <li class="auth-only"><a href="#">Logout</a></li>
-        <li class="auth-only" id="user-greeting"></li>
+        <li><a href="/login">Login</a></li>
+        <li><a href="/register">Register</a></li>
       </ul>
     </nav>
 
     <nav class="side-menu" id="side-menu">
       <ul>
-        <li><a href="#">My Feed</a></li>
+        <li><a href="#" id="my-feed-link">My Feed</a></li>
         <li class="category-toggle">Categories</li>
         <li>
           <ul id="category-tabs" class="category-tabs"></ul>
         </li>
-        <li class="auth-only"><a href="#">Created Posts</a></li>
-        <li class="auth-only"><a href="#">Liked Posts</a></li>
       </ul>
       <div class="side-glow"></div>
     </nav>
