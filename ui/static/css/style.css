@@ -1,3 +1,10 @@
+/* Color Variables */
+:root {
+  --color-primary: #00ff75;
+  --color-secondary: #3700ff;
+  --gradient-main: linear-gradient(163deg, var(--color-primary) 0%, var(--color-secondary) 100%);
+}
+
 /* Reset */
 * {
     margin: 0;
@@ -29,7 +36,7 @@
     left: 0;
     width: 100%;
     height: 120%;
-    background: url('images/sci-fi-bg.jpg') no-repeat center center;
+    /* background: url('images/sci-fi-bg.jpg') no-repeat center center; */
     background-size: cover;
     transform: translateZ(-1px) scale(1.5);
     z-index: -1;
@@ -75,7 +82,7 @@
   }
   
   .signup-btn {
-    background-color: #00ff55;
+    background-image: var(--color-primary);
     color: black;
     border: none;
     padding: 0.8rem 1.5rem;
@@ -84,9 +91,9 @@
     cursor: pointer;
     transition: 0.3s;
   }
-  
+
   .signup-btn:hover {
-    background-color: #00dd44;
+    filter: brightness(1.1);
   }
   .button-group {
     display: flex;
@@ -100,26 +107,33 @@
     font-size: 1rem;
     border-radius: 6px;
     font-weight: 500;
-    transition: background 0.3s, color 0.3s;
+    transition: background 0.3s, color 0.3s, filter 0.3s;
   }
-  
+
   .primary {
-    background-color: #00ff55;
+    background-image: var(--gradient-main);
     color: black;
   }
-  
+
   .primary:hover {
-    background-color: #00dd44;
+    filter: brightness(1.1);
+    box-shadow: 0 0 10px var(--color-primary);
   }
   
   .secondary {
-    background-color: #333;
-    color: white;
-    border: 1px solid #666;
+    background-image: var(--gradient-main);
+    color: black;
+    border: none;
   }
   
   .secondary:hover {
-    background-color: #444;
+    filter: brightness(1.1);
+    box-shadow: 0 0 10px var(--color-primary);
+  }
+
+  .btn:hover {
+    filter: brightness(1.1);
+    box-shadow: 0 0 10px var(--color-primary);
   }
   
   .ghost {

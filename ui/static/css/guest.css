@@ -30,7 +30,6 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
-    border-radius: 0 0 20px 20px;
     box-shadow: 0px 5px 15px rgba(0, 255, 117, 0.1);
     position: absolute;
     top: 0;
@@ -102,40 +101,41 @@
     line-height: 1.4;
   }
   
-  /* Burger menu button styling */
-  .burger-menu {
-    position: fixed;
-    top: 20px;
-    left: 20px;
-    width: 30px;
-    height: 25px;
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
-    cursor: pointer;
-    z-index: 1001; /* above other content */
-  }
-  
-  .burger-menu span {
-    display: block;
-    height: 3px;
-    background-color: var(--color-primary); 
-    border-radius: 2px;
-    z-index: 1001 ;
-  }
-  
+ 
   /* Side menu styles */
   .side-menu {
     position: fixed;
-    top: 0;
-    left: -250px; /* hidden off screen */
+    top: 60px;
+    left: 0;
     width: 250px;
-    height: 100vh;
-    box-shadow: 2px 0 12px rgba(0,0,0,0.5);
-    padding-top: 60px; /* space for burger icon */
-    transition: left 0.3s ease;
-    z-index: 1000;
+    height: calc(100vh - 60px);
+    background-color: #0f0f0f;
+    transition: all 0.3s ease;
+    z-index: 1;
+    padding-top: 1em;
+    overflow: visible; /* important so the glow can show outside */
   }
+  
+  /* Glowing gradient bar */
+  .side-glow {
+    position: absolute;
+    top: 0;
+    right: -4px; /* stick it just outside the menu */
+    width: 4px;
+    height: 100%;
+    background: linear-gradient(163deg, #00ff75 0%, #3700ff 100%);
+    box-shadow: 12px 0 30px 3px rgba(0, 255, 117, 0.5);
+    opacity: 0.1;
+    transition: opacity 0.3s ease;
+    border-radius: 0 4px 4px 0;
+    pointer-events: none; /* avoid interfering with hover/clicks */
+  }
+  
+  /* Show glow on hover */
+  .side-menu:hover .side-glow {
+    opacity: 1;
+  }    
+  
   
   .side-menu ul {
     list-style: none;
@@ -153,11 +153,10 @@
     font-weight: 600;
     display: block;
   }
-  
-  /* Active state: slide in */
-  .side-menu.active {
-    left: 0;
-  }
+
+  .auth-only {
+    display: none;
+  }  
   
   .forum-content {
     width: 100%;
@@ -167,6 +166,7 @@
     display: flex;
     flex-direction: column;
     gap: 3em;
+    margin-left: 250px;
   }
   
   .category-section {
@@ -182,6 +182,10 @@
     margin-bottom: 1em;
     border-bottom: 1px solid rgba(0, 255, 117, 0.2);
     padding-bottom: 0.5em;
+  }
+
+  .category-toggle {
+    color: var(--color-primary);
   }
   
   .post {
@@ -238,7 +242,7 @@
   
   .category-tabs li a {
     display: block;
-    padding: 0.75em 1em;
+    padding: 0.75em 0.5em;
     color: #ccc;
     text-decoration: none;
     font-weight: 500;
