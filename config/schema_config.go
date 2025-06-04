@@ -33,6 +33,7 @@ const CreatePostsTable = `CREATE TABLE IF NOT EXISTS posts (
             post_id TEXT PRIMARY KEY,
             user_id TEXT NOT NULL,
             category_id INTEGER NOT NULL,
+            title TEXT NOT NULL CHECK (LENGTH(title) <= 200),
             content TEXT NOT NULL CHECK (LENGTH(content) <= 2000),
             created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
             updated_at TIMESTAMP,

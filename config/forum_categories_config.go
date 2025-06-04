@@ -9,8 +9,6 @@ var Categories = []string{
 	"Hobbies",
 	"Random",
 	"Pets",
-}
-
-var NewCategories = []string{
-	"Gaming",
+	"Travel",
+	"EMVALOTIS",
 }

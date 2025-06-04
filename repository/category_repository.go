@@ -34,7 +34,7 @@ func (r *CategoryRepository) GetAll() ([]models.Category, error) {
 
 // repository/post_repository.go
 func (r *PostRepository) GetPostsByCategoryWithUser(categoryID int) ([]models.PostWithUser, error) {
-	query := `SELECT p.post_id, p.user_id, u.username, p.category_id, p.content, p.created_at
+	query := `SELECT p.post_id, p.user_id, u.username, p.category_id, p.title, p.content, p.created_at
 			  FROM posts p JOIN user u ON p.user_id = u.user_id
 			  WHERE p.category_id = ?`
 
@@ -47,7 +47,7 @@ func (r *PostRepository) GetPostsByCategoryWithUser(categoryID int) ([]models.Po
 	var posts []models.PostWithUser
 	for rows.Next() {
 		var p models.PostWithUser
-		if err := rows.Scan(&p.ID, &p.UserID, &p.Username, &p.CategoryID, &p.Content, &p.CreatedAt); err != nil {
+		if err := rows.Scan(&p.ID, &p.UserID, &p.Username, &p.CategoryID, &p.Title, &p.Content, &p.CreatedAt); err != nil {
 			return nil, err
 		}
 		posts = append(posts, p)
