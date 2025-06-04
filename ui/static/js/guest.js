@@ -299,7 +299,6 @@ document.addEventListener("DOMContentLoaded", async () => {
       link.href = "#";
       link.textContent = category.name;
       link.dataset.categoryId = category.id;
-      if (index === 0) link.classList.add("active");
 
       link.addEventListener("click", (e) => {
         e.preventDefault();
