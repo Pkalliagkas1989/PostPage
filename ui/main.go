@@ -23,6 +23,9 @@ func main() {
 	http.HandleFunc("/guest", func(w http.ResponseWriter, r *http.Request) {
 		http.ServeFile(w, r, "./static/templates/guest.html")
 	})
+	http.HandleFunc("/user", func(w http.ResponseWriter, r *http.Request) {
+		http.ServeFile(w, r, "./static/templates/user.html")
+	})
 
 	// Start the server
 	log.Println("Serving on http://localhost:8081/")
