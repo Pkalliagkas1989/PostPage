@@ -255,7 +255,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   }
 
   try {
-    const response = await fetch("/api/user/feed");
+    const response = await fetch("http://localhost:8080/forum/api/guest");
     if (!response.ok) throw new Error("Network response was not ok");
 
     data = await response.json(); // Assign to outer 'data'
