@@ -3,6 +3,9 @@
 ## Guest view
 curl  http://localhost:8080/forum/api/guest
 
+## Get categories
+curl http://localhost:8080/forum/api/categories
+
 ## Register a new user:
 
 curl -X POST http://localhost:8080/forum/api/register \
