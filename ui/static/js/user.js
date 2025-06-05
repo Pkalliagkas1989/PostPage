@@ -38,6 +38,18 @@ async function handleReaction(
 }
 
 document.addEventListener("DOMContentLoaded", async () => {
+  try {
+    const res = await fetch("http://localhost:8080/forum/api/session/verify", {
+      credentials: "include",
+    });
+    if (!res.ok) throw new Error("Not authenticated");
+    const sessionData = await res.json();
+    console.log("Welcome", sessionData.user);
+  } catch (err) {
+    window.location.href = "/login.html";
+    return; // Stop further execution
+  }
+
   const myFeedLink = document.getElementById("my-feed-link");
   let data;
 
