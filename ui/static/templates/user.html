@@ -8,21 +8,22 @@
     <link rel="stylesheet" href="/static/css/modal.css" />
     <script src="/static/js/user.js" defer></script>
     <script src="/static/js/modal.js" defer></script>
-    <script>  // user.js
-fetch("http://localhost:8080/forum/api/session/verify", {
-  credentials: "include"
-})
-  .then(res => {
-    if (!res.ok) throw new Error("Not authenticated");
-    return res.json();
-  })
-  .then(data => {
-    console.log("Welcome", data.user);
-  })
-  .catch(err => {
-    window.location.href = "/login.html"; // Redirect to login if invalid
-  });
- </script>
+    <script>
+      // user.js
+      fetch("http://localhost:8080/forum/api/session/verify", {
+        credentials: "include",
+      })
+        .then((res) => {
+          if (!res.ok) throw new Error("Not authenticated");
+          return res.json();
+        })
+        .then((data) => {
+          console.log("Welcome", data.user);
+        })
+        .catch((err) => {
+          window.location.href = "/login.html"; // Redirect to login if invalid
+        });
+    </script>
   </head>
   <body>
     <nav class="navbar">
@@ -97,9 +98,6 @@ fetch("http://localhost:8080/forum/api/session/verify", {
         <label for="post-category" class="modal-label">Category</label>
         <select id="post-category">
           <option value="" disabled selected>Select category</option>
-          <option value="general">General</option>
-          <option value="feedback">Feedback</option>
-          <option value="help">Help</option>
         </select>
 
         <button id="submit-post">Submit</button>
