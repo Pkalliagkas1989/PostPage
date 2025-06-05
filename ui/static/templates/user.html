@@ -76,19 +76,19 @@
     <div id="post-modal" class="modal hidden">
       <div class="modal-content">
         <button class="close-btn">&times;</button>
-        <h2 style="color: var(--color-primary)">Create New Post</h2>
-        <input type="text" id="post-title" placeholder="Post title" />
+        <h2>Create Post</h2>
+
+        <input id="post-title" placeholder="Post Title" />
         <textarea id="post-body" placeholder="Write your post..."></textarea>
-        <label
-          for="post-category"
-          style="display: block; margin-top: 1em; color: var(--color-primary)"
-        >
-          Category
-        </label>
+
+        <label for="post-category" class="modal-label">Category</label>
         <select id="post-category">
           <option value="" disabled selected>Select category</option>
-          <!-- You can populate these dynamically later -->
+          <option value="general">General</option>
+          <option value="feedback">Feedback</option>
+          <option value="help">Help</option>
         </select>
+
         <button id="submit-post">Submit</button>
       </div>
     </div>
