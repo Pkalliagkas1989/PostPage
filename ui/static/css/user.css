@@ -212,6 +212,12 @@
     font-size: 0.85em;
     color: #888;
   }
+
+  .post-title {
+    color: var(--color-primary);
+    font-size: 2em;
+    font-weight: bolder;
+  }
   
   .comment {
     margin-left: 1em;
