@@ -26,6 +26,12 @@
   color: #ccc;
 }
 
+.modal-label {
+    display: block;
+    margin-top: 1em;
+    color: var(--color-primary);
+  }  
+
 .modal-content input,
 .modal-content textarea {
   width: 100%;
