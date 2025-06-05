@@ -5,8 +5,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const submitBtn = document.getElementById("submit-post");
   const postTitle = document.getElementById("post-title");
   const postBody = document.getElementById("post-body");
-  const template = document.getElementById("post-template");
-  const postsContainer = document.getElementById("posts-container");
+  const commentBtn = document.getElementById("comment-btn");
 
   createBtn.onclick = () => {
     modal.classList.remove("hidden");
@@ -22,12 +21,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     if (!title || !content) return;
 
-    const clone = template.content.cloneNode(true);
-    clone.querySelector(".post-header").textContent = title;
-    clone.querySelector(".post-content").textContent = content;
-    clone.querySelector(".post-time").textContent = new Date().toLocaleString();
-
-    postsContainer.prepend(clone); // Adds newest post at the top
+    //Add logic for POSTing to server
 
     postTitle.value = "";
     postBody.value = "";

@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Forum Feed</title>
     <link rel="stylesheet" href="/static/css/user.css" />
+    <link rel="stylesheet" href="/static/css/modal.css" />
     <script src="/static/js/user.js" defer></script>
     <script src="/static/js/modal.js" defer></script>
     <script>  // user.js
@@ -60,12 +61,11 @@ fetch("http://localhost:8080/forum/api/session/verify", {
         <p class="post-content"></p>
         <time class="post-time"></time>
         <div class="post-reactions">
-          <button class="like-btn" disabled>
-            👍 <span class="like-count">0</span>
-          </button>
-          <button class="dislike-btn" disabled>
+          <button class="like-btn">👍 <span class="like-count">0</span></button>
+          <button class="dislike-btn">
             👎 <span class="dislike-count">0</span>
           </button>
+          <button class="comment-btn">Add Comment</button>
         </div>
         <div class="post-comments"></div>
       </div>
@@ -77,10 +77,8 @@ fetch("http://localhost:8080/forum/api/session/verify", {
         <span class="comment-content"></span>
         <time class="comment-time"></time>
         <div class="comment-reactions">
-          <button class="like-btn" disabled>
-            👍 <span class="like-count">0</span>
-          </button>
-          <button class="dislike-btn" disabled>
+          <button class="like-btn">👍 <span class="like-count">0</span></button>
+          <button class="dislike-btn">
             👎 <span class="dislike-count">0</span>
           </button>
         </div>
@@ -90,19 +88,19 @@ fetch("http://localhost:8080/forum/api/session/verify", {
     <div id="post-modal" class="modal hidden">
       <div class="modal-content">
         <button class="close-btn">&times;</button>
-        <h2 style="color: var(--color-primary)">Create New Post</h2>
-        <input type="text" id="post-title" placeholder="Post title" />
+        <h2>Create Post</h2>
+
+        <input id="post-title" placeholder="Post Title" />
         <textarea id="post-body" placeholder="Write your post..."></textarea>
-        <label
-          for="post-category"
-          style="display: block; margin-top: 1em; color: var(--color-primary)"
-        >
-          Category
-        </label>
+
+        <label for="post-category" class="modal-label">Category</label>
         <select id="post-category">
           <option value="" disabled selected>Select category</option>
-          <!-- You can populate these dynamically later -->
+          <option value="general">General</option>
+          <option value="feedback">Feedback</option>
+          <option value="help">Help</option>
         </select>
+
         <button id="submit-post">Submit</button>
       </div>
     </div>
