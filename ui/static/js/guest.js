@@ -81,6 +81,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       postElement.querySelector(
         ".post-header"
       ).textContent = `${post.username} posted in ${post.categoryName}`;
+      postElement.querySelector(".post-title").textContent = post.title;
       postElement.querySelector(".post-content").textContent = post.content;
       postElement.querySelector(".post-time").textContent = new Date(
         post.created_at
@@ -188,6 +189,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       postElement.querySelector(
         ".post-header"
       ).textContent = `${post.username} posted in ${post.category_name}`;
+      postElement.querySelector(".post-title").textContent = post.title;
       postElement.querySelector(".post-content").textContent = post.content;
       postElement.querySelector(".post-time").textContent = new Date(
         post.created_at
