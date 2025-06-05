@@ -8,6 +8,21 @@
     <link rel="stylesheet" href="/static/css/modal.css" />
     <script src="/static/js/user.js" defer></script>
     <script src="/static/js/modal.js" defer></script>
+    <script>  // user.js
+fetch("http://localhost:8080/forum/api/session/verify", {
+  credentials: "include"
+})
+  .then(res => {
+    if (!res.ok) throw new Error("Not authenticated");
+    return res.json();
+  })
+  .then(data => {
+    console.log("Welcome", data.user);
+  })
+  .catch(err => {
+    window.location.href = "/login.html"; // Redirect to login if invalid
+  });
+ </script>
   </head>
   <body>
     <nav class="navbar">

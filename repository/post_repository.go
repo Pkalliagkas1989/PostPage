@@ -15,7 +15,7 @@ func NewPostRepository(db *sql.DB) *PostRepository {
 
 func (r *PostRepository) GetAllPosts() ([]models.Post, error) {
 	rows, err := r.db.Query(`
-		SELECT post_id, user_id, category_id, content, created_at, updated_at 
+		SELECT post_id, user_id, category_id, title, content, created_at, updated_at 
 		FROM posts ORDER BY created_at DESC`)
 	if err != nil {
 		return nil, err
@@ -25,7 +25,7 @@ func (r *PostRepository) GetAllPosts() ([]models.Post, error) {
 	var posts []models.Post
 	for rows.Next() {
 		var post models.Post
-		err := rows.Scan(&post.ID, &post.UserID, &post.CategoryID, &post.Content, &post.CreatedAt, &post.UpdatedAt)
+		err := rows.Scan(&post.ID, &post.UserID, &post.CategoryID, &post.Title, &post.Content, &post.CreatedAt, &post.UpdatedAt)
 		if err != nil {
 			return nil, err
 		}

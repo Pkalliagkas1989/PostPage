@@ -181,6 +181,8 @@ func InsertMockData(db *sql.DB) error {
 		"Hobbies":              3,
 		"Random":               4,
 		"Pets":                 5,
+		"Travel":               6,
+		"EMVALOTIS":            7,
 	}
 
 	posts := map[string]string{
@@ -226,14 +228,14 @@ func InsertMockData(db *sql.DB) error {
 	}
 
 	// Insert posts
-	_, err = tx.Exec(`INSERT INTO posts (post_id, user_id, category_id, content, created_at) VALUES (?, ?, ?, ?, ?)`,
-		posts["AlicePost"], userIDs["Alice"], categories["Software Development"], "Alice on tech.", now)
+	_, err = tx.Exec(`INSERT INTO posts (post_id, user_id, category_id, title, content, created_at) VALUES (?, ?, ?, ?, ?, ?)`,
+		posts["AlicePost"], userIDs["Alice"], categories["Software Development"],"Alice's Title", "Alice on tech.", now)
 	if err != nil {
 		return fmt.Errorf("insert Alice post: %v", err)
 	}
 
-	_, err = tx.Exec(`INSERT INTO posts (post_id, user_id, category_id, content, created_at) VALUES (?, ?, ?, ?, ?)`,
-		posts["BobPost"], userIDs["Bob"], categories["Pets"], "Bob on lifestyle.", now)
+	_, err = tx.Exec(`INSERT INTO posts (post_id, user_id, category_id, title, content, created_at) VALUES (?, ?, ?, ?, ?, ?)`,
+		posts["BobPost"], userIDs["Bob"], categories["Pets"], "Bob's Title", "Bob on lifestyle.", now)
 	if err != nil {
 		return fmt.Errorf("insert Bob post: %v", err)
 	}

@@ -36,6 +36,7 @@ type PostResponse struct {
 	Username     string             `json:"username"`
 	CategoryID   int                `json:"category_id"`
 	CategoryName string             `json:"category_name"` // NEW FIELD
+	Title        string             `json:"title"`         // Optional title field
 	Content      string             `json:"content"`
 	CreatedAt    time.Time          `json:"created_at"`
 	Comments     []CommentResponse  `json:"comments,omitempty"`
@@ -133,7 +134,8 @@ func (h *GuestHandler) GetGuestData(w http.ResponseWriter, r *http.Request) {
 				UserID:       post.UserID,
 				Username:     post.Username,
 				CategoryID:   post.CategoryID,
-				CategoryName: cat.Name, // ✅ inject category name
+				CategoryName: cat.Name,   // ✅ inject category name
+				Title:        post.Title, // Optional title field
 				Content:      post.Content,
 				CreatedAt:    post.CreatedAt,
 				Comments:     []CommentResponse{},  // ✅ avoid null

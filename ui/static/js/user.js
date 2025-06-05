@@ -1,3 +1,4 @@
+
 function countReactions(reactions = []) {
   return {
     likes: reactions.filter((r) => r.reaction_type === 1).length,
