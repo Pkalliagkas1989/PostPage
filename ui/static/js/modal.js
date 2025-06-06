@@ -30,18 +30,29 @@ document.addEventListener("DOMContentLoaded", () => {
 
   async function populateCategories() {
     try {
-      const response = await fetch(
-        "http://localhost:8080/forum/api/categories"
-      );
+      const response = await fetch("http://localhost:8080/forum/api/categories");
       const data = await response.json();
 
-      const select = document.getElementById("post-category");
+      const container = document.getElementById("post-category");
+      container.innerHTML = "";
 
       data.forEach((category) => {
-        const option = document.createElement("option");
-        option.value = category.name.toLowerCase().replace(/\s+/g, "-");
-        option.textContent = category.name;
-        select.appendChild(option);
+        const checkbox = document.createElement("input");
+        checkbox.type = "checkbox";
+        checkbox.id = `cat-${category.name.toLowerCase().replace(/\s+/g, "-")}`;
+        checkbox.name = "categories";
+        checkbox.value = category.name;
+
+        const label = document.createElement("label");
+        label.htmlFor = checkbox.id;
+        label.textContent = category.name;
+
+        const wrapper = document.createElement("div");
+        wrapper.classList.add("checkbox-item");
+        wrapper.appendChild(checkbox);
+        wrapper.appendChild(label);
+
+        container.appendChild(wrapper);
       });
     } catch (error) {
       console.error("Error fetching categories:", error);
