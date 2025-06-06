@@ -46,7 +46,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     const sessionData = await res.json();
     console.log("Welcome", sessionData.user);
   } catch (err) {
-    window.location.href = "/login.html";
+    window.location.href = "/login";
     return; // Stop further execution
   }
 
