@@ -38,3 +38,19 @@ fetch("http://localhost:8080/forum/api/session/login", {
         password: "supersecret"
     })
 })
+
+
+
+ ## Create a Post
+
+ curl -X POST http://localhost:8080/forum/api/posts \
+  -H "Content-Type: application/json" \
+  -b cookies.txt \
+  -d '{"category_id":1,"title":"My first post","content":"Hello forum!"}'
+
+## Create a comment
+
+curl -X POST http://localhost:8080/forum/api/comments \
+  -H "Content-Type: application/json" \
+  -d '{"post_id":"<POST_ID>","content":"Nice post!"}' \
+  -b cookies.txt
