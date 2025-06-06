@@ -20,7 +20,22 @@ document.addEventListener("DOMContentLoaded", () => {
     const title = postTitle.value.trim();
     const content = postBody.value.trim();
     const checkedCategories = document.querySelectorAll('input[name="categories"]:checked');
-    if (checkedCategories.length === 0) return;
+    const categoryContainer = document.getElementById("post-category");
+    if (checkedCategories.length === 0) {
+      const existingWarning = document.getElementById("category-warning");
+      if (!existingWarning) {
+        const warning = document.createElement("div");
+        warning.id = "category-warning";
+        warning.textContent = "Please select a category";
+        warning.style.color = "red";
+        warning.style.marginTop = "5px";
+        categoryContainer.appendChild(warning);
+      }
+      return;
+    } else {
+      const existingWarning = document.getElementById("category-warning");
+      if (existingWarning) existingWarning.remove();
+    }
     const categoryId = parseInt(checkedCategories[0].value, 10);
 
     if (!title || !content || !categoryId) return;
@@ -62,6 +77,7 @@ document.addEventListener("DOMContentLoaded", () => {
       postTitle.value = "";
       postBody.value = "";
       modal.classList.add("hidden");
+      window.location.reload();
     } catch (error) {
       console.error("Error creating post:", error);
     }
