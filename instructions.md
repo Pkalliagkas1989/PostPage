@@ -54,3 +54,22 @@ curl -X POST http://localhost:8080/forum/api/comments \
   -H "Content-Type: application/json" \
   -d '{"post_id":"<POST_ID>","content":"Nice post!"}' \
   -b cookies.txt
+
+## React to a post or comment
+
+To like or dislike a post or comment you must be logged in. Use the ID of the
+target post or comment along with the reaction type:
+
+```
+curl -X POST http://localhost:8080/forum/api/react \
+  -H "Content-Type: application/json" \
+  -d '{"target_id":"<TARGET_ID>","target_type":"post","reaction_type":1}' \
+  -b cookies.txt
+
+curl -X POST http://localhost:8080/forum/api/react \
+  -H "Content-Type: application/json" \
+  -d '{"target_id":"<TARGET_ID>","target_type":"comment","reaction_type":2}' \
+  -b cookies.txt
+```
+Reaction type `1` represents a like and `2` represents a dislike. Running the
+command again with the same parameters will toggle the reaction off.
