@@ -3,6 +3,8 @@ package repository
 import (
 	"database/sql"
 	"forum/models"
+	"forum/utils"
+	"time"
 )
 
 type PostRepository struct {
@@ -33,4 +35,16 @@ func (r *PostRepository) GetAllPosts() ([]models.Post, error) {
 	}
 
 	return posts, nil
+}
+
+// Create inserts a new post into the database
+func (r *PostRepository) Create(post models.Post) (*models.Post, error) {
+	post.ID = utils.GenerateUUID()
+	post.CreatedAt = time.Now()
+	_, err := r.db.Exec(`INSERT INTO posts (post_id, user_id, category_id, title, content, created_at) VALUES (?, ?, ?, ?, ?, ?)`,
+		post.ID, post.UserID, post.CategoryID, post.Title, post.Content, post.CreatedAt)
+	if err != nil {
+		return nil, err
+	}
+	return &post, nil
 }
