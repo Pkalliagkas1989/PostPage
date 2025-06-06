@@ -70,3 +70,26 @@
   color: #eee;
   font-size: 1em;
 }
+
+
+/* Compact styling for checkbox category group */
+.checkbox-group {
+  margin-top: 0.5em;
+  display: flex;
+  flex-direction: column;
+  gap: 0.2em;
+}
+
+.checkbox-item {
+  display: flex;
+  align-items: center;
+  gap: 0.4em;
+  color: #eee;
+  font-size: 0.9em;
+  line-height: 1.2;
+}
+
+.checkbox-item input[type="checkbox"] {
+  width: 14px;
+  height: 14px;
+}
