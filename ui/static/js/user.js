@@ -13,7 +13,7 @@ async function handleReaction(
   dislikeBtn
 ) {
   try {
-    const res = await fetch("/api/react", {
+    const res = await fetch("http://localhost:8080/forum/api/react", {
       method: "POST",
       credentials: "include",
       headers: {
