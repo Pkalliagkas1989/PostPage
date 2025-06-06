@@ -5,38 +5,6 @@ function countReactions(reactions = []) {
   };
 }
 
-async function handleReaction(
-  targetId,
-  targetType,
-  reactionType,
-  likeBtn,
-  dislikeBtn
-) {
-  try {
-    const res = await fetch("http://localhost:8080/forum/api/react", {
-      method: "POST",
-      credentials: "include",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        target_id: targetId,
-        target_type: targetType,
-        reaction_type: reactionType,
-      }),
-    });
-
-    if (!res.ok) throw new Error("Failed to react");
-
-    const updatedReactions = await res.json();
-    const { likes, dislikes } = countReactions(updatedReactions);
-    likeBtn.querySelector(".like-count").textContent = likes;
-    dislikeBtn.querySelector(".dislike-count").textContent = dislikes;
-  } catch (err) {
-    console.error("Reaction failed:", err);
-  }
-}
-
 document.addEventListener("DOMContentLoaded", async () => {
   try {
     const res = await fetch("http://localhost:8080/forum/api/session/verify", {
@@ -48,6 +16,53 @@ document.addEventListener("DOMContentLoaded", async () => {
   } catch (err) {
     window.location.href = "/login";
     return; // Stop further execution
+  }
+
+  async function handleReaction(
+    targetId,
+    targetType,
+    reactionType,
+    likeBtn,
+    dislikeBtn
+  ) {
+    try {
+      const res = await fetch("http://localhost:8080/forum/api/react", {
+        method: "POST",
+        credentials: "include",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          target_id: targetId,
+          target_type: targetType,
+          reaction_type: reactionType,
+        }),
+      });
+
+      if (!res.ok) throw new Error("Failed to react");
+
+      const updatedReactions = await res.json();
+
+      // Update the reactions inside `data`
+      if (targetType === "post") {
+        for (const category of data.categories) {
+          const post = category.posts.find((p) => p.id === targetId);
+          if (post) post.reactions = updatedReactions;
+        }
+      } else if (targetType === "comment") {
+        for (const category of data.categories) {
+          for (const post of category.posts) {
+            const comment = post.comments.find((c) => c.id === targetId);
+            if (comment) comment.reactions = updatedReactions;
+          }
+        }
+      }
+
+      // Update the counts in UI
+      const { likes, dislikes } = countReactions(updatedReactions);
+      likeBtn.querySelector(".like-count").textContent = likes;
+      dislikeBtn.querySelector(".dislike-count").textContent = dislikes;
+    } catch (err) {
+      console.error("Reaction failed:", err);
+    }
   }
 
   const myFeedLink = document.getElementById("my-feed-link");
