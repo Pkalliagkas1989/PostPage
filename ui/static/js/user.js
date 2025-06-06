@@ -72,12 +72,23 @@ document.addEventListener("DOMContentLoaded", async () => {
   const forumContainer = document.getElementById("forumContainer");
   const categoryTabs = document.getElementById("category-tabs");
 
-  function renderPost(post, commentTemplate, postTemplate, container, categoryName, refreshFn) {
+  function renderPost(
+    post,
+    commentTemplate,
+    postTemplate,
+    container,
+    categoryName,
+    refreshFn
+  ) {
     const postElement = postTemplate.content.cloneNode(true);
-    postElement.querySelector(".post-header").textContent = `${post.username} posted in ${categoryName}`;
+    postElement.querySelector(
+      ".post-header"
+    ).textContent = `${post.username} posted in ${categoryName}`;
     postElement.querySelector(".post-title").textContent = post.title;
     postElement.querySelector(".post-content").textContent = post.content;
-    postElement.querySelector(".post-time").textContent = new Date(post.created_at).toLocaleString();
+    postElement.querySelector(".post-time").textContent = new Date(
+      post.created_at
+    ).toLocaleString();
 
     const postContainer = postElement.querySelector(".post");
     const likeBtn = postContainer.querySelector(".like-btn");
@@ -102,8 +113,11 @@ document.addEventListener("DOMContentLoaded", async () => {
       const commentElement = commentTemplate.content.cloneNode(true);
       const commentNode = commentElement.querySelector(".comment");
       commentNode.querySelector(".comment-user").textContent = comment.username;
-      commentNode.querySelector(".comment-content").textContent = comment.content;
-      commentNode.querySelector(".comment-time").textContent = new Date(comment.created_at).toLocaleString();
+      commentNode.querySelector(".comment-content").textContent =
+        comment.content;
+      commentNode.querySelector(".comment-time").textContent = new Date(
+        comment.created_at
+      ).toLocaleString();
       const commentLikeBtn = commentNode.querySelector(".like-btn");
       const commentDislikeBtn = commentNode.querySelector(".dislike-btn");
       const { likes, dislikes } = countReactions(comment.reactions || []);
@@ -114,10 +128,22 @@ document.addEventListener("DOMContentLoaded", async () => {
       const newCommentLikeBtn = commentNode.querySelector(".like-btn");
       const newCommentDislikeBtn = commentNode.querySelector(".dislike-btn");
       newCommentLikeBtn.addEventListener("click", () =>
-        handleReaction(comment.id, "comment", 1, newCommentLikeBtn, newCommentDislikeBtn)
+        handleReaction(
+          comment.id,
+          "comment",
+          1,
+          newCommentLikeBtn,
+          newCommentDislikeBtn
+        )
       );
       newCommentDislikeBtn.addEventListener("click", () =>
-        handleReaction(comment.id, "comment", 2, newCommentLikeBtn, newCommentDislikeBtn)
+        handleReaction(
+          comment.id,
+          "comment",
+          2,
+          newCommentLikeBtn,
+          newCommentDislikeBtn
+        )
       );
       commentsContainer.appendChild(commentElement);
     });
@@ -139,17 +165,20 @@ document.addEventListener("DOMContentLoaded", async () => {
           const content = textarea.value.trim();
           if (!content) return;
           try {
-            const res = await fetch("http://localhost:8080/forum/api/comments", {
-              method: "POST",
-              credentials: "include",
-              headers: {
-                "Content-Type": "application/json"
-              },
-              body: JSON.stringify({
-                post_id: post.id,
-                content: content
-              })
-            });
+            const res = await fetch(
+              "http://localhost:8080/forum/api/comments",
+              {
+                method: "POST",
+                credentials: "include",
+                headers: {
+                  "Content-Type": "application/json",
+                },
+                body: JSON.stringify({
+                  post_id: post.id,
+                  content: content,
+                }),
+              }
+            );
             if (!res.ok) throw new Error("Failed to post comment");
             textarea.value = "";
             refreshFn();
@@ -182,7 +211,14 @@ document.addEventListener("DOMContentLoaded", async () => {
     allPosts.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
 
     allPosts.forEach((post) => {
-      renderPost(post, commentTemplate, postTemplate, forumContainer, post.categoryName, renderAllPosts);
+      renderPost(
+        post,
+        commentTemplate,
+        postTemplate,
+        forumContainer,
+        post.categoryName,
+        renderAllPosts
+      );
     });
   }
 
@@ -203,7 +239,14 @@ document.addEventListener("DOMContentLoaded", async () => {
     const postsContainer = categoryElement.querySelector(".category-posts");
 
     category.posts.forEach((post) => {
-      renderPost(post, commentTemplate, postTemplate, postsContainer, category.name, () => renderPostsForCategory(categoryId));
+      renderPost(
+        post,
+        commentTemplate,
+        postTemplate,
+        postsContainer,
+        category.name,
+        () => renderPostsForCategory(categoryId)
+      );
     });
 
     forumContainer.appendChild(categoryElement);
@@ -220,18 +263,21 @@ document.addEventListener("DOMContentLoaded", async () => {
   }
 
   try {
-    const response = await fetch("http://localhost:8080/forum/api/guest");
-    if (!response.ok) throw new Error("Network response was not ok");
+    // 1. Fetch categories only for tabs
+    const categoryRes = await fetch(
+      "http://localhost:8080/forum/api/categories"
+    );
+    if (!categoryRes.ok) throw new Error("Failed to fetch categories");
+    const categories = await categoryRes.json();
 
-    data = await response.json(); // Assign to outer 'data'
-    if (!data || !Array.isArray(data.categories)) {
-      console.error("Invalid forum data structure:", data);
-      return;
-    }
+    // 2. Fetch guest data with posts and comments
+    const guestRes = await fetch("http://localhost:8080/forum/api/guest");
+    if (!guestRes.ok) throw new Error("Failed to fetch guest data");
+    const guestData = await guestRes.json();
 
+    // 3. Use categories ONLY for tabs
     categoryTabs.innerHTML = "";
-
-    data.categories.forEach((category, index) => {
+    categories.forEach((category) => {
       const tabItem = document.createElement("li");
       const link = document.createElement("a");
       link.href = "#";
@@ -244,6 +290,7 @@ document.addEventListener("DOMContentLoaded", async () => {
           .querySelectorAll(".category-tabs a")
           .forEach((a) => a.classList.remove("active"));
         link.classList.add("active");
+
         renderPostsForCategory(category.id);
       });
 
@@ -251,6 +298,10 @@ document.addEventListener("DOMContentLoaded", async () => {
       categoryTabs.appendChild(tabItem);
     });
 
+    // 4. Use guestData as your data source for categories + posts
+    data = guestData;
+
+    // 5. Render all posts initially
     renderAllPosts();
   } catch (err) {
     console.error("Error fetching forum data:", err);
