@@ -180,7 +180,18 @@ document.addEventListener("DOMContentLoaded", async () => {
               }
             );
             if (!res.ok) throw new Error("Failed to post comment");
+            const newComment = await res.json();
             textarea.value = "";
+
+            // Update the local `data` object by adding the new comment
+            for (const category of data.categories) {
+              const postToUpdate = category.posts.find((p) => p.id === post.id);
+              if (postToUpdate) {
+                if (!postToUpdate.comments) postToUpdate.comments = [];
+                postToUpdate.comments.push(newComment);
+                break;
+              }
+            }
             refreshFn();
           } catch (err) {
             console.error("Failed to submit comment:", err);
