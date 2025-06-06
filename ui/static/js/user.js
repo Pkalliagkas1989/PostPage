@@ -62,7 +62,10 @@ document.addEventListener("DOMContentLoaded", async () => {
     const postTemplate = document.getElementById("post-template");
     const commentTemplate = document.getElementById("comment-template");
 
-    if (!data || !data.categories) return;
+    if (!data || !Array.isArray(data.categories)) {
+      console.error("No valid categories to render");
+      return;
+    }
 
     let allPosts = data.categories.flatMap((category) =>
       category.posts.map((post) => ({ ...post, categoryName: category.name }))
@@ -104,7 +107,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       const commentsContainer = postElement.querySelector(".post-comments");
       commentsContainer.innerHTML = "";
 
-      post.comments.forEach((comment) => {
+      (post.comments || []).forEach((comment) => {
         const commentElement = commentTemplate.content.cloneNode(true);
         const commentNode = commentElement.querySelector(".comment");
 
@@ -205,7 +208,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       const commentsContainer = postElement.querySelector(".post-comments");
       commentsContainer.innerHTML = "";
 
-      post.comments.forEach((comment) => {
+      (post.comments || []).forEach((comment) => {
         const commentElement = commentTemplate.content.cloneNode(true);
         const commentNode = commentElement.querySelector(".comment");
 
@@ -273,6 +276,10 @@ document.addEventListener("DOMContentLoaded", async () => {
     if (!response.ok) throw new Error("Network response was not ok");
 
     data = await response.json(); // Assign to outer 'data'
+    if (!data || !Array.isArray(data.categories)) {
+      console.error("Invalid forum data structure:", data);
+      return;
+    }
 
     categoryTabs.innerHTML = "";
 
