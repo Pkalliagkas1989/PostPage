@@ -55,10 +55,10 @@ func InitDB() (*sql.DB, error) {
 			db.Close()
 			return nil, fmt.Errorf("failed to populate categories: %v", err)
 		}
-		if err := InsertMockData(db); err != nil {
-			db.Close()
-			return nil, fmt.Errorf("failed to insert mock data: %v", err)
-		}
+		// if err := InsertMockData(db); err != nil {
+		// 	db.Close()
+		// 	return nil, fmt.Errorf("failed to insert mock data: %v", err)
+		// }
 		fmt.Println("Database initialized successfully.")
 	} else {
 		fmt.Println("Database already exists. Skipping initialization.")
@@ -108,13 +108,14 @@ func createIndexes(db *sql.DB) error {
 
 	// Define all index creation SQL statements
 	indexStatements := []string{
-		config.IdxPostsUserID,
-		config.IdxPostsCategoryID,
-		config.IdxCommentsPostID,
-		config.IdxCommentsUserID,
-		config.IdxReactionsUserID,
-		config.IdxReactionsPostID,
-		config.IdxReactionsCommentID,
+		config.CreateUserTable,
+		config.CreateUserAuthTable,
+		config.CreateSessionsTable,
+		config.CreateCategoriesTable,
+		config.CreatePostsTable,
+		config.CreateCommentsTable,
+		config.CreateReactionsTable,
+		config.CreatePostCategoriesTable,
 	}
 
 	// Execute each index creation statement
@@ -161,123 +162,123 @@ func populateCategories(db *sql.DB, categories []string) error {
 	return nil
 }
 
-// InsertMockData inserts mock users, categories, posts, comments, and reactions for testing/demo purposes.
-func InsertMockData(db *sql.DB) error {
-	now := "2025-05-26T14:30:00"
+// // InsertMockData inserts mock users, categories, posts, comments, and reactions for testing/demo purposes.
+// func InsertMockData(db *sql.DB) error {
+// 	now := "2025-05-26T14:30:00"
 
-	users := map[string]string{
-		"Alice": "alice@example.com",
-		"Bob":   "bob@example.com",
-	}
+// 	users := map[string]string{
+// 		"Alice": "alice@example.com",
+// 		"Bob":   "bob@example.com",
+// 	}
 
-	userIDs := map[string]string{
-		"Alice": "e6f50c45-77f7-45d6-a206-111111111111",
-		"Bob":   "f7e61d55-88e8-46e6-b307-222222222222",
-	}
+// 	userIDs := map[string]string{
+// 		"Alice": "e6f50c45-77f7-45d6-a206-111111111111",
+// 		"Bob":   "f7e61d55-88e8-46e6-b307-222222222222",
+// 	}
 
-	categories := map[string]int{
-		"General":          1,
-		"Software Development": 2,
-		"Hobbies":              3,
-		"Random":               4,
-		"Pets":                 5,
-		"Travel":               6,
-		"EMVALOTIS":            7,
-	}
+// 	categories := map[string]int{
+// 		"General":              1,
+// 		"Software Development": 2,
+// 		"Hobbies":              3,
+// 		"Random":               4,
+// 		"Pets":                 5,
+// 		"Travel":               6,
+// 		"EMVALOTIS":            7,
+// 	}
 
-	posts := map[string]string{
-		"AlicePost": "a1e2b3c4-d5f6-7890-1234-aaaaaaaaaaaa",
-		"BobPost":   "b1e2c3d4-f5g6-7890-1234-bbbbbbbbbbbb",
-	}
+// 	posts := map[string]string{
+// 		"AlicePost": "a1e2b3c4-d5f6-7890-1234-aaaaaaaaaaaa",
+// 		"BobPost":   "b1e2c3d4-f5g6-7890-1234-bbbbbbbbbbbb",
+// 	}
 
-	comments := map[string]string{
-		"AliceOnBob": "c1d2e3f4-g5h6-7890-1234-cccccccccccc",
-		"BobOnAlice": "d1e2f3g4-h5i6-7890-1234-dddddddddddd",
-	}
+// 	comments := map[string]string{
+// 		"AliceOnBob": "c1d2e3f4-g5h6-7890-1234-cccccccccccc",
+// 		"BobOnAlice": "d1e2f3g4-h5i6-7890-1234-dddddddddddd",
+// 	}
 
-	tx, err := db.Begin()
-	if err != nil {
-		return err
-	}
-	defer tx.Rollback()
+// 	tx, err := db.Begin()
+// 	if err != nil {
+// 		return err
+// 	}
+// 	defer tx.Rollback()
 
-	// Insert users
-	for name, email := range users {
-		_, err := tx.Exec(`INSERT OR IGNORE INTO user (user_id, username, email, created_at) VALUES (?, ?, ?, ?)`,
-			userIDs[name], name, email, now)
-		if err != nil {
-			return fmt.Errorf("insert user %s: %v", name, err)
-		}
-	}
+// 	// Insert users
+// 	for name, email := range users {
+// 		_, err := tx.Exec(`INSERT OR IGNORE INTO user (user_id, username, email, created_at) VALUES (?, ?, ?, ?)`,
+// 			userIDs[name], name, email, now)
+// 		if err != nil {
+// 			return fmt.Errorf("insert user %s: %v", name, err)
+// 		}
+// 	}
 
-	// Insert user passwords
-	for name := range users {
-		_, err := tx.Exec(`INSERT OR IGNORE INTO user_auth (user_id, password_hash) VALUES (?, ?)`,
-			userIDs[name], "hashed_password_123")
-		if err != nil {
-			return fmt.Errorf("insert password for user %s: %v", name, err)
-		}
-	}
+// 	// Insert user passwords
+// 	for name := range users {
+// 		_, err := tx.Exec(`INSERT OR IGNORE INTO user_auth (user_id, password_hash) VALUES (?, ?)`,
+// 			userIDs[name], "hashed_password_123")
+// 		if err != nil {
+// 			return fmt.Errorf("insert password for user %s: %v", name, err)
+// 		}
+// 	}
 
-	// Insert categories
-	for name, id := range categories {
-		_, err := tx.Exec(`INSERT OR IGNORE INTO categories (category_id, name) VALUES (?, ?)`, id, name)
-		if err != nil {
-			return fmt.Errorf("insert category %s: %v", name, err)
-		}
-	}
+// 	// Insert categories
+// 	for name, id := range categories {
+// 		_, err := tx.Exec(`INSERT OR IGNORE INTO categories (category_id, name) VALUES (?, ?)`, id, name)
+// 		if err != nil {
+// 			return fmt.Errorf("insert category %s: %v", name, err)
+// 		}
+// 	}
 
-	// Insert posts
-	_, err = tx.Exec(`INSERT INTO posts (post_id, user_id, category_id, title, content, created_at) VALUES (?, ?, ?, ?, ?, ?)`,
-		posts["AlicePost"], userIDs["Alice"], categories["Software Development"],"Alice's Title", "Alice on tech.", now)
-	if err != nil {
-		return fmt.Errorf("insert Alice post: %v", err)
-	}
+// 	// Insert posts
+// 	_, err = tx.Exec(`INSERT INTO posts (post_id, user_id, category_id, title, content, created_at) VALUES (?, ?, ?, ?, ?, ?)`,
+// 		posts["AlicePost"], userIDs["Alice"], categories["Software Development"], "Alice's Title", "Alice on tech.", now)
+// 	if err != nil {
+// 		return fmt.Errorf("insert Alice post: %v", err)
+// 	}
 
-	_, err = tx.Exec(`INSERT INTO posts (post_id, user_id, category_id, title, content, created_at) VALUES (?, ?, ?, ?, ?, ?)`,
-		posts["BobPost"], userIDs["Bob"], categories["Pets"], "Bob's Title", "Bob on lifestyle.", now)
-	if err != nil {
-		return fmt.Errorf("insert Bob post: %v", err)
-	}
+// 	_, err = tx.Exec(`INSERT INTO posts (post_id, user_id, category_id, title, content, created_at) VALUES (?, ?, ?, ?, ?, ?)`,
+// 		posts["BobPost"], userIDs["Bob"], categories["Pets"], "Bob's Title", "Bob on lifestyle.", now)
+// 	if err != nil {
+// 		return fmt.Errorf("insert Bob post: %v", err)
+// 	}
 
-	// Insert comments
-	_, err = tx.Exec(`INSERT INTO comments (comment_id, post_id, user_id, content, created_at) VALUES (?, ?, ?, ?, ?)`,
-		comments["AliceOnBob"], posts["BobPost"], userIDs["Alice"], "Nice post, Bob!", now)
-	if err != nil {
-		return fmt.Errorf("insert Alice comment: %v", err)
-	}
+// 	// Insert comments
+// 	_, err = tx.Exec(`INSERT INTO comments (comment_id, post_id, user_id, content, created_at) VALUES (?, ?, ?, ?, ?)`,
+// 		comments["AliceOnBob"], posts["BobPost"], userIDs["Alice"], "Nice post, Bob!", now)
+// 	if err != nil {
+// 		return fmt.Errorf("insert Alice comment: %v", err)
+// 	}
 
-	_, err = tx.Exec(`INSERT INTO comments (comment_id, post_id, user_id, content, created_at) VALUES (?, ?, ?, ?, ?)`,
-		comments["BobOnAlice"], posts["AlicePost"], userIDs["Bob"], "Interesting point, Alice.", now)
-	if err != nil {
-		return fmt.Errorf("insert Bob comment: %v", err)
-	}
+// 	_, err = tx.Exec(`INSERT INTO comments (comment_id, post_id, user_id, content, created_at) VALUES (?, ?, ?, ?, ?)`,
+// 		comments["BobOnAlice"], posts["AlicePost"], userIDs["Bob"], "Interesting point, Alice.", now)
+// 	if err != nil {
+// 		return fmt.Errorf("insert Bob comment: %v", err)
+// 	}
 
-	// Insert reactions to comments
-	_, err = tx.Exec(`INSERT INTO reactions (user_id, comment_id, post_id, reaction_type, created_at) VALUES (?, ?, ?, ?, ?)`,
-		userIDs["Alice"], comments["BobOnAlice"], nil, 1, now)
-	if err != nil {
-		return fmt.Errorf("insert Alice reaction: %v", err)
-	}
+// 	// Insert reactions to comments
+// 	_, err = tx.Exec(`INSERT INTO reactions (user_id, comment_id, post_id, reaction_type, created_at) VALUES (?, ?, ?, ?, ?)`,
+// 		userIDs["Alice"], comments["BobOnAlice"], nil, 1, now)
+// 	if err != nil {
+// 		return fmt.Errorf("insert Alice reaction: %v", err)
+// 	}
 
-	_, err = tx.Exec(`INSERT INTO reactions (user_id, comment_id, post_id, reaction_type, created_at) VALUES (?, ?, ?, ?, ?)`,
-		userIDs["Bob"], comments["AliceOnBob"], nil, 2, now)
-	if err != nil {
-		return fmt.Errorf("insert Bob reaction: %v", err)
-	}
+// 	_, err = tx.Exec(`INSERT INTO reactions (user_id, comment_id, post_id, reaction_type, created_at) VALUES (?, ?, ?, ?, ?)`,
+// 		userIDs["Bob"], comments["AliceOnBob"], nil, 2, now)
+// 	if err != nil {
+// 		return fmt.Errorf("insert Bob reaction: %v", err)
+// 	}
 
-	// Additional reactions (likes on posts)
-	_, err = tx.Exec(`INSERT INTO reactions (user_id, comment_id, post_id, reaction_type, created_at) VALUES (?, ?, ?, ?, ?)`,
-		userIDs["Alice"], nil, posts["BobPost"], 1, now)
-	if err != nil {
-		return fmt.Errorf("insert Alice reaction on Bob's post: %v", err)
-	}
+// 	// Additional reactions (likes on posts)
+// 	_, err = tx.Exec(`INSERT INTO reactions (user_id, comment_id, post_id, reaction_type, created_at) VALUES (?, ?, ?, ?, ?)`,
+// 		userIDs["Alice"], nil, posts["BobPost"], 1, now)
+// 	if err != nil {
+// 		return fmt.Errorf("insert Alice reaction on Bob's post: %v", err)
+// 	}
 
-	_, err = tx.Exec(`INSERT INTO reactions (user_id, comment_id, post_id, reaction_type, created_at) VALUES (?, ?, ?, ?, ?)`,
-		userIDs["Bob"], nil, posts["AlicePost"], 2, now)
-	if err != nil {
-		return fmt.Errorf("insert Bob reaction on Alice's post: %v", err)
-	}
+// 	_, err = tx.Exec(`INSERT INTO reactions (user_id, comment_id, post_id, reaction_type, created_at) VALUES (?, ?, ?, ?, ?)`,
+// 		userIDs["Bob"], nil, posts["AlicePost"], 2, now)
+// 	if err != nil {
+// 		return fmt.Errorf("insert Bob reaction on Alice's post: %v", err)
+// 	}
 
-	return tx.Commit()
-}
+// 	return tx.Commit()
+// }

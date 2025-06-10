@@ -2,6 +2,15 @@ package config
 
 import ()
 
+const CreatePostCategoriesTable = `CREATE TABLE IF NOT EXISTS post_categories (
+    post_id TEXT NOT NULL,
+    category_id INTEGER NOT NULL,
+    PRIMARY KEY (post_id, category_id),
+    FOREIGN KEY (post_id) REFERENCES posts(post_id) ON DELETE CASCADE,
+    FOREIGN KEY (category_id) REFERENCES categories(category_id) ON DELETE CASCADE
+);`
+
+
 const CreateUserTable = `CREATE TABLE IF NOT EXISTS user (
             user_id TEXT PRIMARY KEY,
             username TEXT NOT NULL UNIQUE CHECK (LENGTH(username) <= 50),
@@ -30,16 +39,15 @@ const CreateCategoriesTable = `CREATE TABLE IF NOT EXISTS categories (
         );`
 		
 const CreatePostsTable = `CREATE TABLE IF NOT EXISTS posts (
-            post_id TEXT PRIMARY KEY,
-            user_id TEXT NOT NULL,
-            category_id INTEGER NOT NULL,
-            title TEXT NOT NULL CHECK (LENGTH(title) <= 200),
-            content TEXT NOT NULL CHECK (LENGTH(content) <= 2000),
-            created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-            updated_at TIMESTAMP,
-            FOREIGN KEY (user_id) REFERENCES user(user_id) ON DELETE CASCADE,
-            FOREIGN KEY (category_id) REFERENCES categories(category_id) ON DELETE CASCADE
-        );`
+    post_id TEXT PRIMARY KEY,
+    user_id TEXT NOT NULL,
+    title TEXT NOT NULL CHECK (LENGTH(title) <= 200),
+    content TEXT NOT NULL CHECK (LENGTH(content) <= 2000),
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP,
+    FOREIGN KEY (user_id) REFERENCES user(user_id) ON DELETE CASCADE
+);`
+
 
 const CreateCommentsTable = `CREATE TABLE IF NOT EXISTS comments (
             comment_id TEXT PRIMARY KEY,

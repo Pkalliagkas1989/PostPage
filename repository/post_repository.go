@@ -27,7 +27,7 @@ func (r *PostRepository) GetAllPosts() ([]models.Post, error) {
 	var posts []models.Post
 	for rows.Next() {
 		var post models.Post
-		err := rows.Scan(&post.ID, &post.UserID, &post.CategoryID, &post.Title, &post.Content, &post.CreatedAt, &post.UpdatedAt)
+		err := rows.Scan(&post.ID, &post.UserID, &post.Title, &post.Content, &post.CreatedAt, &post.UpdatedAt)
 		if err != nil {
 			return nil, err
 		}
@@ -38,13 +38,44 @@ func (r *PostRepository) GetAllPosts() ([]models.Post, error) {
 }
 
 // Create inserts a new post into the database
-func (r *PostRepository) Create(post models.Post) (*models.Post, error) {
+func (r *PostRepository) Create(post models.Post, categoryIDs []int) (*models.Post, error) {
 	post.ID = utils.GenerateUUID()
 	post.CreatedAt = time.Now()
-	_, err := r.db.Exec(`INSERT INTO posts (post_id, user_id, category_id, title, content, created_at) VALUES (?, ?, ?, ?, ?, ?)`,
-		post.ID, post.UserID, post.CategoryID, post.Title, post.Content, post.CreatedAt)
+
+	tx, err := r.db.Begin()
 	if err != nil {
 		return nil, err
 	}
+
+	// Insert the post
+	_, err = tx.Exec(`INSERT INTO posts (post_id, user_id, title, content, created_at) VALUES (?, ?, ?, ?, ?)`,
+		post.ID, post.UserID, post.Title, post.Content, post.CreatedAt)
+	if err != nil {
+		tx.Rollback()
+		return nil, err
+	}
+
+	// Insert post-category relationships
+	stmt, err := tx.Prepare(`INSERT INTO post_categories (post_id, category_id) VALUES (?, ?)`)
+	if err != nil {
+		tx.Rollback()
+		return nil, err
+	}
+	defer stmt.Close()
+
+	for _, cid := range categoryIDs {
+		_, err = stmt.Exec(post.ID, cid)
+		if err != nil {
+			tx.Rollback()
+			return nil, err
+		}
+	}
+
+	err = tx.Commit()
+	if err != nil {
+		return nil, err
+	}
+
 	return &post, nil
 }
+
