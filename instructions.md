@@ -48,6 +48,11 @@ fetch("http://localhost:8080/forum/api/session/login", {
   -b cookies.txt \
   -d '{"category_id":1,"title":"My first post","content":"Hello forum!"}'
 
+  curl -X POST http://localhost:8080/forum/api/posts \               ──(Tue,Jun10)─┘
+  -H "Content-Type: application/json" \
+  -b cookies.txt \
+  -d '{"title":"My first TITLE","content":"Hello new forum!","category_ids":[1,2]}'
+
 ## Create a comment
 
 curl -X POST http://localhost:8080/forum/api/comments \
