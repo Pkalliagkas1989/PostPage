@@ -160,7 +160,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         textarea.style.width = "100%";
         const submitBtn = document.createElement("button");
         submitBtn.textContent = "Submit Comment";
-        submitBtn.style.marginTop = "5px";
+        submitBtn.classList.add("comment-btn");
         submitBtn.addEventListener("click", async () => {
           const content = textarea.value.trim();
           if (!content) return;
