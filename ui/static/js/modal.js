@@ -16,72 +16,82 @@ document.addEventListener("DOMContentLoaded", () => {
   };
 
   submitBtn.onclick = async () => {
-    console.log("Submit button clicked");
-    const title = postTitle.value.trim();
-    const content = postBody.value.trim();
-    const checkedCategories = document.querySelectorAll('input[name="categories"]:checked');
-    const categoryContainer = document.getElementById("post-category");
-    if (checkedCategories.length === 0) {
-      const existingWarning = document.getElementById("category-warning");
-      if (!existingWarning) {
-        const warning = document.createElement("div");
-        warning.id = "category-warning";
-        warning.textContent = "Please select a category";
-        warning.style.color = "red";
-        warning.style.marginTop = "5px";
-        categoryContainer.appendChild(warning);
-      }
-      return;
-    } else {
-      const existingWarning = document.getElementById("category-warning");
-      if (existingWarning) existingWarning.remove();
+  console.log("Submit button clicked");
+  const title = postTitle.value.trim();
+  const content = postBody.value.trim();
+
+  const checkedCategories = document.querySelectorAll('input[name="categories"]:checked');
+  const categoryContainer = document.getElementById("post-category");
+
+  // Validate category selection
+  if (checkedCategories.length === 0) {
+    const existingWarning = document.getElementById("category-warning");
+    if (!existingWarning) {
+      const warning = document.createElement("div");
+      warning.id = "category-warning";
+      warning.textContent = "Please select at least one category";
+      warning.style.color = "red";
+      warning.style.marginTop = "5px";
+      categoryContainer.appendChild(warning);
     }
-    const categoryId = parseInt(checkedCategories[0].value, 10);
+    return;
+  } else {
+    const existingWarning = document.getElementById("category-warning");
+    if (existingWarning) existingWarning.remove();
+  }
 
-    if (!title || !content || !categoryId) return;
+  // Collect selected category IDs
+  const categoryIds = Array.from(checkedCategories).map(checkbox =>
+    parseInt(checkbox.value, 10)
+  );
 
-    try {
-      const res = await fetch("http://localhost:8080/forum/api/session/verify", {
-        credentials: "include",
-      });
-      if (!res.ok) throw new Error("Not authenticated");
-      const sessionData = await res.json();
-      console.log("Welcome", sessionData.user);
-    } catch (err) {
-      window.location.href = "/login";
-      return; // Stop further execution
+  if (!title || !content || categoryIds.length === 0) return;
+
+  // Session verification
+  try {
+    const res = await fetch("http://localhost:8080/forum/api/session/verify", {
+      credentials: "include",
+    });
+    if (!res.ok) throw new Error("Not authenticated");
+    const sessionData = await res.json();
+    console.log("Welcome", sessionData.user);
+  } catch (err) {
+    window.location.href = "/login";
+    return;
+  }
+
+  // Submit post
+  try {
+    const response = await fetch("http://localhost:8080/forum/api/posts/create", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      credentials: "include",
+      body: JSON.stringify({
+        title: title,
+        content: content,
+        category_ids: categoryIds // ✅ now sending an array
+      })
+    });
+
+    if (!response.ok) {
+      throw new Error(`Server error: ${response.status}`);
     }
 
-    try {
-      const response = await fetch("http://localhost:8080/forum/api/posts/create", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json"
-        },
-        credentials: "include", // sends cookies (like from cookies.txt in curl)
-        body: JSON.stringify({
-          category_id: categoryId,
-          title: title,
-          content: content
-        })
-      });
+    const result = await response.json();
+    console.log("Post created successfully:", result);
 
-      if (!response.ok) {
-        throw new Error(`Server error: ${response.status}`);
-      }
+    // Cleanup
+    postTitle.value = "";
+    postBody.value = "";
+    modal.classList.add("hidden");
+    window.location.reload();
+  } catch (error) {
+    console.error("Error creating post:", error);
+  }
+};
 
-      const result = await response.json();
-      console.log("Post created successfully:", result);
-
-      // Reset and hide modal
-      postTitle.value = "";
-      postBody.value = "";
-      modal.classList.add("hidden");
-      window.location.reload();
-    } catch (error) {
-      console.error("Error creating post:", error);
-    }
-  };
 
   async function populateCategories() {
     try {
