@@ -25,7 +25,7 @@ func NewSessionRepository(db *sql.DB) *SessionRepository {
 }
 
 // Create creates a new session for a user
-func (r *SessionRepository) Create(userID, ipAddress string) (*models.Session, error) {
+func (r *SessionRepository) Create(userID, ipAddress, csrfToken string) (*models.Session, error) {
 	// First, delete any existing sessions for this user
 	_, err := r.DB.Exec("DELETE FROM sessions WHERE user_id = ?", userID)
 	if err != nil {
@@ -34,56 +34,66 @@ func (r *SessionRepository) Create(userID, ipAddress string) (*models.Session, e
 
 	// Generate a new session ID
 	sessionID := utils.GenerateSessionToken()
+	createdAt := time.Now().UTC()
 	expiresAt := utils.CalculateSessionExpiry()
 
-	// Insert the new session
+	// Insert the new session with CSRF token
 	_, err = r.DB.Exec(
-		"INSERT INTO sessions (user_id, session_id, ip_address, created_at, expires_at) VALUES (?, ?, ?, ?, ?)",
-		userID, sessionID, ipAddress, time.Now(), expiresAt,
+		"INSERT INTO sessions (user_id, session_id, ip_address, created_at, expires_at, csrf_token) VALUES (?, ?, ?, ?, ?, ?)",
+		userID, sessionID, ipAddress, createdAt.Format(time.RFC3339), expiresAt.Format(time.RFC3339), csrfToken,
 	)
 	if err != nil {
 		return nil, err
 	}
 
-	// Return the session
+	// Return the session object including CSRF token
 	session := &models.Session{
 		UserID:    userID,
 		SessionID: sessionID,
 		IPAddress: ipAddress,
-		CreatedAt: time.Now(),
+		CreatedAt: createdAt,
 		ExpiresAt: expiresAt,
+		CSRFToken: csrfToken,
 	}
 
 	return session, nil
 }
+
 
 // GetBySessionID retrieves a session by its ID
 func (r *SessionRepository) GetBySessionID(sessionID string) (*models.Session, error) {
 	var session models.Session
 	var createdStr, expiresStr string
 
-	err := r.DB.QueryRow(
-		"SELECT user_id, session_id, ip_address, created_at, expires_at FROM sessions WHERE session_id = ?",
-		sessionID,
-	).Scan(&session.UserID, &session.SessionID, &session.IPAddress, &createdStr, &expiresStr)
+err := r.DB.QueryRow(
+    "SELECT user_id, session_id, ip_address, created_at, expires_at, csrf_token FROM sessions WHERE session_id = ?",
+    sessionID,
+).Scan(
+    &session.UserID,
+    &session.SessionID,
+    &session.IPAddress,
+    &createdStr,
+    &expiresStr,
+    &session.CSRFToken,
+)
 
-	if err != nil {
-		if err == sql.ErrNoRows {
-			return nil, ErrSessionNotFound
-		}
-		return nil, err
-	}
+if err != nil {
+    if err == sql.ErrNoRows {
+        return nil, ErrSessionNotFound
+    }
+    return nil, err
+}
 
-	// Parse timestamps
-	session.CreatedAt, err = time.Parse(time.RFC3339, createdStr)
-	if err != nil {
-		return nil, err
-	}
+session.CreatedAt, err = time.Parse(time.RFC3339, createdStr)
+if err != nil {
+    return nil, err
+}
 
-	session.ExpiresAt, err = time.Parse(time.RFC3339, expiresStr)
-	if err != nil {
-		return nil, err
-	}
+session.ExpiresAt, err = time.Parse(time.RFC3339, expiresStr)
+if err != nil {
+    return nil, err
+}
+
 
 	// Check if session is expired
 	if time.Now().After(session.ExpiresAt) {

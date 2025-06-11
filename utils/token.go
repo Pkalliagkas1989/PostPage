@@ -1,6 +1,8 @@
 package utils
 
 import (
+	"crypto/rand"
+	"encoding/hex"
 	"time"
 
 	"github.com/google/uuid"
@@ -20,4 +22,13 @@ func GenerateSessionToken() string {
 // Default session lifetime is 24 hours
 func CalculateSessionExpiry() time.Time {
 	return time.Now().Add(24 * time.Hour)
+}
+
+func GenerateCSRFToken() string {
+	bytes := make([]byte, 32) // 256 bits of randomness
+	if _, err := rand.Read(bytes); err != nil {
+		// fallback (very rare)
+		return GenerateUUID()
+	}
+	return hex.EncodeToString(bytes)
 }

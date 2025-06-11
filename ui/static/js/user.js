@@ -9,11 +9,17 @@ function countReactions(reactions = []) {
 document.addEventListener("DOMContentLoaded", async () => {
   try {
     const res = await fetch("http://localhost:8080/forum/api/session/verify", {
-      credentials: "include",
-    });
-    if (!res.ok) throw new Error("Not authenticated");
-    const sessionData = await res.json();
-    console.log("Welcome", sessionData.user);
+    credentials: "include",
+  });
+if (!res.ok) throw new Error("Not authenticated");
+
+// Defensive JSON parse
+const contentType = res.headers.get("content-type") || "";
+if (!contentType.includes("application/json")) {
+  throw new Error("Expected JSON response");
+}
+const sessionData = await res.json();
+console.log("Welcome", sessionData.user);
   } catch (err) {
     window.location.href = "/login";
     return; // Stop further execution
@@ -30,7 +36,10 @@ document.addEventListener("DOMContentLoaded", async () => {
       const res = await fetch("http://localhost:8080/forum/api/react", {
         method: "POST",
         credentials: "include",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+          "X-CSRF-Token": sessionStorage.getItem("csrf_token"),
+        },
         body: JSON.stringify({
           target_id: targetId,
           target_type: targetType,
@@ -172,8 +181,9 @@ document.addEventListener("DOMContentLoaded", async () => {
                 method: "POST",
                 credentials: "include",
                 headers: {
-                  "Content-Type": "application/json",
-                },
+  "Content-Type": "application/json",
+  "X-CSRF-Token": sessionStorage.getItem("csrf_token"),
+},
                 body: JSON.stringify({
                   post_id: post.id,
                   content: content,

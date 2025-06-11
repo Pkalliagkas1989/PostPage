@@ -65,8 +65,9 @@ document.addEventListener("DOMContentLoaded", () => {
     const response = await fetch("http://localhost:8080/forum/api/posts/create", {
       method: "POST",
       headers: {
-        "Content-Type": "application/json"
-      },
+  "Content-Type": "application/json",
+  "X-CSRF-Token": sessionStorage.getItem("csrf_token"),
+},
       credentials: "include",
       body: JSON.stringify({
         title: title,

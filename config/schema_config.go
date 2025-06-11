@@ -25,13 +25,15 @@ const CreateUserAuthTable = `CREATE TABLE IF NOT EXISTS user_auth (
         );`
 
 const CreateSessionsTable = `CREATE TABLE IF NOT EXISTS sessions (
-            user_id TEXT PRIMARY KEY,
-            session_id TEXT NOT NULL UNIQUE,
-            ip_address TEXT,
-            created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-            expires_at TIMESTAMP NOT NULL,
-            FOREIGN KEY (user_id) REFERENCES user(user_id) ON DELETE CASCADE
-        );`
+    user_id TEXT PRIMARY KEY,
+    session_id TEXT NOT NULL UNIQUE,
+    csrf_token TEXT NOT NULL,             -- ✅ new column
+    ip_address TEXT,
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    expires_at TIMESTAMP NOT NULL,
+    FOREIGN KEY (user_id) REFERENCES user(user_id) ON DELETE CASCADE
+);`
+
 
 const CreateCategoriesTable = `CREATE TABLE IF NOT EXISTS categories (
             category_id INTEGER PRIMARY KEY AUTOINCREMENT,

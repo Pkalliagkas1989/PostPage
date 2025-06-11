@@ -134,10 +134,11 @@ func (h *AuthHandler) Login(w http.ResponseWriter, r *http.Request) {
 		}
 		return
 	}
+	csrfToken := utils.GenerateCSRFToken()	
 
 	// Create a new session
 	log.Println("Creating session for user:", user.ID)
-	session, err := h.SessionRepo.Create(user.ID, r.RemoteAddr)
+	session, err := h.SessionRepo.Create(user.ID, r.RemoteAddr, csrfToken)
 	log.Println("Session created:", session)
 	if err != nil {
 		http.Error(w, "Failed to create session", http.StatusInternalServerError)
@@ -146,20 +147,22 @@ func (h *AuthHandler) Login(w http.ResponseWriter, r *http.Request) {
 
 	// Set cookie
 	http.SetCookie(w, &http.Cookie{
-		Name:     "session_id",
-		Value:    session.SessionID,
-		Path:     "/",
-		Expires:  session.ExpiresAt,
-		HttpOnly: true,
-		Secure:   r.TLS != nil, // Set Secure flag if TLS is enabled
-		SameSite: http.SameSiteStrictMode,
-	})
+    Name:     "session_id",
+    Value:    session.SessionID,
+    Path:     "/",
+    Expires:  session.ExpiresAt,
+    HttpOnly: true,
+    Secure:   false,
+    SameSite: http.SameSiteLaxMode, // Change from None to Lax for localhost
+})
+
 
 	// Return response
 	w.Header().Set("Content-Type", "application/json")
 	response := models.LoginResponse{
 		User:      *user,
 		SessionID: session.SessionID,
+		CSRFToken: csrfToken,
 	}
 	json.NewEncoder(w).Encode(response)
 }

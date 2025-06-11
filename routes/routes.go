@@ -9,7 +9,6 @@ import (
 	"forum/repository"
 )
 
-// SetupRoutes configures all routes for the application
 func SetupRoutes(db *sql.DB) http.Handler {
 	// Create repositories
 	userRepo := repository.NewUserRepository(db)
@@ -26,27 +25,34 @@ func SetupRoutes(db *sql.DB) http.Handler {
 	postHandler := handlers.NewPostHandler(postRepo)
 	commentHandler := handlers.NewCommentHandler(commentRepo)
 	reactionHandler := handlers.NewReactionHandler(reactionRepo)
+	guestHandler := handlers.NewGuestHandler(categoryRepo, postRepo, commentRepo, reactionRepo)
 
 	// Create middleware
 	registerLimiter := middleware.NewRateLimiter()
 	authMiddleware := middleware.NewAuthMiddleware(sessionRepo, userRepo)
-	guestHandler := handlers.NewGuestHandler(categoryRepo, postRepo, commentRepo, reactionRepo)
+	csrfMiddleware := middleware.CSRFMiddleware(sessionRepo)
 	corsMiddleware := middleware.NewCORSMiddleware("http://localhost:8081")
 
-	// Create router (using standard net/http for simplicity)
+	// Create router
 	mux := http.NewServeMux()
 
-	// Define auth routes
+	// Public routes
 	mux.Handle("/forum/api/categories", corsMiddleware.Handler(http.HandlerFunc(categoryHandler.GetCategories)))
 	mux.Handle("/forum/api/guest", corsMiddleware.Handler(http.HandlerFunc(guestHandler.GetGuestData)))
 	mux.Handle("/forum/api/register", corsMiddleware.Handler(http.HandlerFunc(registerLimiter.Limit(authHandler.Register))))
 	mux.Handle("/forum/api/session/login", corsMiddleware.Handler(http.HandlerFunc(authHandler.Login)))
-	mux.HandleFunc("/forum/api/session/logout", authHandler.Logout)
+	mux.Handle("/forum/api/session/logout", corsMiddleware.Handler(http.HandlerFunc(authHandler.Logout)))
 	mux.Handle("/forum/api/session/verify", corsMiddleware.Handler(http.HandlerFunc(authHandler.VerifySession)))
-	mux.Handle("/forum/api/posts/create", corsMiddleware.Handler(authMiddleware.RequireAuth(http.HandlerFunc(postHandler.CreatePost))))
-	mux.Handle("/forum/api/comments", corsMiddleware.Handler(authMiddleware.RequireAuth(http.HandlerFunc(commentHandler.CreateComment))))
-	mux.Handle("/forum/api/react", corsMiddleware.Handler(authMiddleware.RequireAuth(http.HandlerFunc(reactionHandler.React))))
 
-	// Apply middleware to all routes
+	// Protected routes with CSRF
+	protected := func(h http.Handler) http.Handler {
+		return corsMiddleware.Handler(authMiddleware.RequireAuth(csrfMiddleware(h)))
+	}
+
+	mux.Handle("/forum/api/posts/create", protected(http.HandlerFunc(postHandler.CreatePost)))
+	mux.Handle("/forum/api/comments", protected(http.HandlerFunc(commentHandler.CreateComment)))
+	mux.Handle("/forum/api/react", protected(http.HandlerFunc(reactionHandler.React)))
+
+	// Global auth injection
 	return authMiddleware.Authenticate(mux)
 }

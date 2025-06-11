@@ -15,7 +15,11 @@
               "http://localhost:8080/forum/api/session/login",
               {
                 method: "POST",
-                headers: { "Content-Type": "application/json" },
+                headers: {
+                  "Content-Type": "application/json",
+                  //"X-CSRF-Token": sessionStorage.getItem("csrf_token"),
+                },
+                // 💡 Important: Include credentials to allow cookies to be set
                 credentials: "include", // 💡 important: allows cookies to be set
                 body: JSON.stringify({ email, password }),
               }
@@ -29,9 +33,11 @@
             const result = await res.json();
             message.style.color = "green";
             message.textContent = "Login successful!";
+            // ✅ Store CSRF token in sessionStorage (or localStorage if session is not enough)
+            sessionStorage.setItem("csrf_token", result.csrf_token);
+
+            // Redirect to protected area
             window.location.href = "/user";
-            // Optionally redirect to dashboard
-            // window.location.href = "/dashboard.html";
           } catch (err) {
             message.textContent = "Error: " + err.message;
           }
