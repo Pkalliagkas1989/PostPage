@@ -35,8 +35,9 @@
             message.textContent = "Login successful!";
             // ✅ Store CSRF token in sessionStorage (or localStorage if session is not enough)
             sessionStorage.setItem("csrf_token", result.csrf_token);
+            // Let other tabs know the session is active
+            localStorage.setItem("session_status", JSON.stringify({ status: "logged_in", timestamp: Date.now() }));
 
-            // Redirect to protected area
             window.location.href = "/user";
           } catch (err) {
             message.textContent = "Error: " + err.message;

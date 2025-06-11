@@ -329,3 +329,29 @@ console.log("Welcome", sessionData.user);
     console.error("Error fetching forum data:", err);
   }
 });
+
+
+const logoutLink = document.getElementById("logout-link");
+
+if (logoutLink) {
+  logoutLink.addEventListener("click", async (e) => {
+    e.preventDefault();
+    try {
+      const res = await fetch("http://localhost:8080/forum/api/session/logout", {
+        method: "POST",
+        credentials: "include",
+      });
+
+      if (!res.ok) throw new Error("Logout failed");
+
+      // Optionally, clear CSRF token
+      sessionStorage.removeItem("csrf_token");
+
+      // Redirect to login
+      window.location.href = "/login";
+    } catch (err) {
+      console.error("Logout failed:", err);
+      alert("Logout failed. Please try again.");
+    }
+  });
+}
