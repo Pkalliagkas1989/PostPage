@@ -26,25 +26,24 @@ func NewSessionRepository(db *sql.DB) *SessionRepository {
 
 // Create creates a new session for a user
 func (r *SessionRepository) Create(userID, ipAddress, csrfToken string) (*models.Session, error) {
-	// First, delete any existing sessions for this user
-	_, err := r.DB.Exec("DELETE FROM sessions WHERE user_id = ?", userID)
-	if err != nil {
-		return nil, err
-	}
+	  // Generate a new session ID
+        sessionID := utils.GenerateSessionToken()
+        createdAt := time.Now().UTC()
+        expiresAt := utils.CalculateSessionExpiry()
 
-	// Generate a new session ID
-	sessionID := utils.GenerateSessionToken()
-	createdAt := time.Now().UTC()
-	expiresAt := utils.CalculateSessionExpiry()
-
-	// Insert the new session with CSRF token
-	_, err = r.DB.Exec(
-		"INSERT INTO sessions (user_id, session_id, ip_address, created_at, expires_at, csrf_token) VALUES (?, ?, ?, ?, ?, ?)",
-		userID, sessionID, ipAddress, createdAt.Format(time.RFC3339), expiresAt.Format(time.RFC3339), csrfToken,
-	)
-	if err != nil {
-		return nil, err
-	}
+        // Insert or replace the session atomically
+        _, err := r.DB.Exec(`INSERT INTO sessions (user_id, session_id, ip_address, created_at, expires_at, csrf_token)
+                VALUES (?, ?, ?, ?, ?, ?)
+                ON CONFLICT(user_id) DO UPDATE SET
+                    session_id = excluded.session_id,
+                    ip_address = excluded.ip_address,
+                    created_at = excluded.created_at,
+                    expires_at = excluded.expires_at,
+                    csrf_token = excluded.csrf_token`,
+                userID, sessionID, ipAddress, createdAt.Format(time.RFC3339), expiresAt.Format(time.RFC3339), csrfToken)
+        if err != nil {
+                return nil, err
+        }
 
 	// Return the session object including CSRF token
 	session := &models.Session{
