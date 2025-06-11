@@ -33,29 +33,29 @@ func (r *CategoryRepository) GetAll() ([]models.Category, error) {
 }
 
 // repository/post_repository.go
-func (r *PostRepository) GetPostsByCategoryWithUser(categoryID int) ([]models.PostWithUser, error) {
-	query := `SELECT p.post_id, p.user_id, u.username, p.category_id, p.title, p.content, p.created_at
-			  FROM posts p JOIN user u ON p.user_id = u.user_id
-			  WHERE p.category_id = ?`
+// func (r *PostRepository) GetPostsByCategoryWithUser(categoryID int) ([]models.PostWithUser, error) {
+// 	query := `SELECT p.post_id, p.user_id, u.username, p.category_id, p.title, p.content, p.created_at
+// 			  FROM posts p JOIN user u ON p.user_id = u.user_id
+// 			  WHERE p.category_id = ?`
 
-	rows, err := r.db.Query(query, categoryID)
-	if err != nil {
-		return nil, err
-	}
-	defer rows.Close()
+// 	rows, err := r.db.Query(query, categoryID)
+// 	if err != nil {
+// 		return nil, err
+// 	}
+// 	defer rows.Close()
 
-	var posts []models.PostWithUser
-	for rows.Next() {
-		var p models.PostWithUser
-		if err := rows.Scan(&p.ID, &p.UserID, &p.Username, &p.CategoryID, &p.Title, &p.Content, &p.CreatedAt); err != nil {
-			return nil, err
-		}
-		posts = append(posts, p)
-	}
-	return posts, nil
-}
+// 	var posts []models.PostWithUser
+// 	for rows.Next() {
+// 		var p models.PostWithUser
+// 		if err := rows.Scan(&p.ID, &p.UserID, &p.Username, &p.CategoryID, &p.Title, &p.Content, &p.CreatedAt); err != nil {
+// 			return nil, err
+// 		}
+// 		posts = append(posts, p)
+// 	}
+// 	return posts, nil
+// }
 
-// repository/comment_repository.go
+// // repository/comment_repository.go
 func (r *CommentRepository) GetCommentsByPostWithUser(postID string) ([]models.CommentWithUser, error) {
 	query := `SELECT c.comment_id, c.post_id, c.user_id, u.username, c.content, c.created_at
 			  FROM comments c JOIN user u ON c.user_id = u.user_id
@@ -76,4 +76,30 @@ func (r *CommentRepository) GetCommentsByPostWithUser(postID string) ([]models.C
 		comments = append(comments, c)
 	}
 	return comments, nil
+}
+
+func (r *PostRepository) GetPostsByCategoryWithUser(categoryID int) ([]models.PostWithUser, error) {
+	rows, err := r.db.Query(`
+		SELECT p.post_id, p.user_id, u.username, pc.category_id, p.title, p.content, p.created_at
+		FROM posts p
+		JOIN post_categories pc ON p.post_id = pc.post_id
+		JOIN user u ON p.user_id = u.user_id
+		WHERE pc.category_id = ?
+		ORDER BY p.created_at DESC
+	`, categoryID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var posts []models.PostWithUser
+	for rows.Next() {
+		var post models.PostWithUser
+		err := rows.Scan(&post.ID, &post.UserID, &post.Username, &post.CategoryID, &post.Title, &post.Content, &post.CreatedAt)
+		if err != nil {
+			return nil, err
+		}
+		posts = append(posts, post)
+	}
+	return posts, nil
 }

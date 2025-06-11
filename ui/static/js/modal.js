@@ -53,7 +53,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     try {
-      const response = await fetch("http://localhost:8080/forum/api/posts", {
+      const response = await fetch("http://localhost:8080/forum/api/posts/create", {
         method: "POST",
         headers: {
           "Content-Type": "application/json"

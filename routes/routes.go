@@ -43,7 +43,7 @@ func SetupRoutes(db *sql.DB) http.Handler {
 	mux.Handle("/forum/api/session/login", corsMiddleware.Handler(http.HandlerFunc(authHandler.Login)))
 	mux.HandleFunc("/forum/api/session/logout", authHandler.Logout)
 	mux.Handle("/forum/api/session/verify", corsMiddleware.Handler(http.HandlerFunc(authHandler.VerifySession)))
-	mux.Handle("/forum/api/posts", corsMiddleware.Handler(authMiddleware.RequireAuth(http.HandlerFunc(postHandler.CreatePost))))
+	mux.Handle("/forum/api/posts/create", corsMiddleware.Handler(authMiddleware.RequireAuth(http.HandlerFunc(postHandler.CreatePost))))
 	mux.Handle("/forum/api/comments", corsMiddleware.Handler(authMiddleware.RequireAuth(http.HandlerFunc(commentHandler.CreateComment))))
 	mux.Handle("/forum/api/react", corsMiddleware.Handler(authMiddleware.RequireAuth(http.HandlerFunc(reactionHandler.React))))
 

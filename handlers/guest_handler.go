@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"fmt"
 	"forum/repository"
 	"forum/utils"
 	"net/http"
@@ -123,6 +124,8 @@ func (h *GuestHandler) GetGuestData(w http.ResponseWriter, r *http.Request) {
 		}
 
 		posts, err := h.postRepo.GetPostsByCategoryWithUser(cat.ID)
+		fmt.Println("Error loading posts by category:", err)
+
 		if err != nil {
 			utils.ErrorResponse(w, "Failed to load posts", http.StatusInternalServerError)
 			return
