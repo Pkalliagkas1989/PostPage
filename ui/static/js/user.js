@@ -269,9 +269,24 @@ async function setupForum() {
       return;
     }
 
-    let allPosts = data.categories.flatMap((category) =>
-      category.posts.map((post) => ({ ...post, categoryName: category.name }))
-    );
+     const map = new Map();
+      data.categories.forEach((category) => {
+      (category.posts || []).forEach((post) => {
+      if (map.has(post.id)) {
+      map.get(post.id).categoryNames.push(category.name);
+      } else {
+      map.set(post.id, {
+      ...post,
+      categoryNames: [category.name],
+              });
+            }
+          });
+      });
+    const allPosts = Array.from(map.values()).sort(
+    (a, b) => new Date(b.created_at) - new Date(a.created_at)
+);
+
+
     allPosts.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
 
     allPosts.forEach((post) => {
@@ -280,7 +295,7 @@ async function setupForum() {
         commentTemplate,
         postTemplate,
         forumContainer,
-        post.categoryName,
+        post.categoryNames.join(", "),
         renderAllPosts
       );
     });
