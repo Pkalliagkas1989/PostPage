@@ -6,6 +6,20 @@ async function loadConfig() {
   API_CONFIG = await res.json();
 }
 
+window.addEventListener("pageshow", function (event) {
+  const form = document.getElementById("loginForm");
+  if (form) {
+    form.reset(); // Clears all inputs
+    const message = document.getElementById("message");
+    if (message) {
+      message.textContent = "";
+    }
+
+    // Optional: clear stored credentials
+    // sessionStorage.removeItem("csrf_token");
+  }
+});
+
 document
   .getElementById("loginForm")
   .addEventListener("submit", async function (e) {
