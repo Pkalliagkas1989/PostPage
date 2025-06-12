@@ -6,6 +6,12 @@ function countReactions(reactions = []) {
   };
 }
 
+// Hide body immediately to prevent flash of protected content (with unique id)
+const style = document.createElement("style");
+style.id = "auth-guard-style";
+style.innerHTML = "body { display: none !important; }";
+document.head.appendChild(style);
+
 document.addEventListener("DOMContentLoaded", async () => {
   let API_CONFIG;
 
@@ -28,6 +34,10 @@ document.addEventListener("DOMContentLoaded", async () => {
       throw new Error("Expected JSON response");
     }
     const sessionData = await res.json();
+    // Remove injected style to reveal page
+    const guardStyle = document.getElementById("auth-guard-style");
+    if (guardStyle) guardStyle.remove();
+    document.body.style.display = "";
     console.log("Welcome", sessionData.user);
   } catch (err) {
     window.location.href = "/login";
