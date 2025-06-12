@@ -1,8 +1,3 @@
-// Hide body immediately via injected style to avoid FOUC
-const style = document.createElement("style");
-style.innerHTML = "body { display: none !important; }";
-document.head.appendChild(style);
-
 function countReactions(reactions = []) {
   if (!Array.isArray(reactions)) reactions = [];
   return {
@@ -26,41 +21,6 @@ document.addEventListener("DOMContentLoaded", async () => {
       credentials: "include",
     });
     if (!res.ok) throw new Error("Not authenticated");
-document.addEventListener("DOMContentLoaded", () => {
-  // Attach logout handler after DOM is loaded
-  const logoutLink = document.getElementById("logout-link");
-  if (logoutLink) {
-    logoutLink.addEventListener("click", async (e) => {
-      e.preventDefault();
-      try {
-        const res = await fetch("http://localhost:8080/forum/api/session/logout", {
-          method: "POST",
-          credentials: "include",
-        });
-
-        if (!res.ok) throw new Error("Logout failed");
-
-        // Optionally, clear CSRF token and local data
-        sessionStorage.removeItem("csrf_token");
-
-        // Redirect to login
-        window.location.href = "/login";
-      } catch (err) {
-        console.error("Logout failed:", err);
-        alert("Logout failed. Please try again.");
-      }
-    });
-  }
-  // Initialize forum only after session verification
-  init();
-});
-
-async function init() {
-  try {
-    const res = await fetch("http://localhost:8080/forum/api/session/verify", {
-      credentials: "include",
-    });
-    if (!res.ok) throw new Error("Not authenticated");
 
     // Defensive JSON parse
     const contentType = res.headers.get("content-type") || "";
@@ -69,26 +29,11 @@ async function init() {
     }
     const sessionData = await res.json();
     console.log("Welcome", sessionData.user);
-    const contentType = res.headers.get("content-type") || "";
-    if (!contentType.includes("application/json")) {
-      throw new Error("Expected JSON response");
-    }
-    const sessionData = await res.json();
-    console.log("Welcome", sessionData.user);
-
-    // Remove the injected style to reveal UI
-    const injectedStyle = document.head.querySelector("style");
-    if (injectedStyle) injectedStyle.remove();
-    document.body.style.display = ""; // Show UI
-
-    await setupForum(); // Proceed with rest of logic
-
   } catch (err) {
     window.location.href = "/login";
+    return; // Stop further execution
   }
-}
 
-async function setupForum() {
   async function handleReaction(
     targetId,
     targetType,
@@ -253,21 +198,6 @@ async function setupForum() {
                 content: content,
               }),
             });
-            const res = await fetch(
-              "http://localhost:8080/forum/api/comments",
-              {
-                method: "POST",
-                credentials: "include",
-                headers: {
-                  "Content-Type": "application/json",
-                  "X-CSRF-Token": sessionStorage.getItem("csrf_token"),
-                },
-                body: JSON.stringify({
-                  post_id: post.id,
-                  content: content,
-                }),
-              }
-            );
             if (!res.ok) throw new Error("Failed to post comment");
             const newComment = await res.json();
             textarea.value = "";
@@ -305,24 +235,9 @@ async function setupForum() {
       return;
     }
 
-     const map = new Map();
-      data.categories.forEach((category) => {
-      (category.posts || []).forEach((post) => {
-      if (map.has(post.id)) {
-      map.get(post.id).categoryNames.push(category.name);
-      } else {
-      map.set(post.id, {
-      ...post,
-      categoryNames: [category.name],
-              });
-            }
-          });
-      });
-    const allPosts = Array.from(map.values()).sort(
-    (a, b) => new Date(b.created_at) - new Date(a.created_at)
-);
-
-
+    let allPosts = data.categories.flatMap((category) =>
+      category.posts.map((post) => ({ ...post, categoryName: category.name }))
+    );
     allPosts.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
 
     allPosts.forEach((post) => {
@@ -331,7 +246,7 @@ async function setupForum() {
         commentTemplate,
         postTemplate,
         forumContainer,
-        post.categoryNames.join(", "),
+        post.categoryName,
         renderAllPosts
       );
     });
@@ -381,10 +296,6 @@ async function setupForum() {
     await loadConfig();
     // 1. Fetch categories only for tabs
     const categoryRes = await fetch(API_CONFIG.CategoriesURI);
-    const categoryRes = await fetch(
-      "http://localhost:8080/forum/api/categories",
-      { credentials: "include" }
-    );
     if (!categoryRes.ok) throw new Error("Failed to fetch categories");
     const categories = await categoryRes.json();
 
@@ -394,7 +305,6 @@ async function setupForum() {
     const guestData = await guestRes.json();
 
     // 3. Use categories ONLY for tabs
-    // 2. Use categories ONLY for tabs
     categoryTabs.innerHTML = "";
     categories.forEach((category) => {
       const tabItem = document.createElement("li");
@@ -417,14 +327,10 @@ async function setupForum() {
       categoryTabs.appendChild(tabItem);
     });
 
-    // Use authenticated user data endpoint
-    const userDataRes = await fetch("http://localhost:8080/forum/api/guest", {
-      credentials: "include",
-    });
-    if (!userDataRes.ok) throw new Error("Failed to fetch user data");
-    data = await userDataRes.json();
+    // 4. Use guestData as your data source for categories + posts
+    data = guestData;
 
-    // 3. Render all posts initially
+    // 5. Render all posts initially
     renderAllPosts();
   } catch (err) {
     console.error("Error fetching forum data:", err);
@@ -456,5 +362,3 @@ async function setupForum() {
     });
   }
 });
-
-}
