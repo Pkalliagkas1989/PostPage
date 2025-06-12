@@ -1,45 +1,54 @@
-      document
-        .getElementById("loginForm")
-        .addEventListener("submit", async function (e) {
-          e.preventDefault();
+let API_CONFIG;
 
-          const email = document.getElementById("email").value;
-          const password = document.getElementById("password").value;
-          const message = document.getElementById("message");
+async function loadConfig() {
+  const res = await fetch("/config");
+  if (!res.ok) throw new Error("Failed to load config");
+  API_CONFIG = await res.json();
+}
 
-          message.textContent = "";
-          message.style.color = "red";
+document
+  .getElementById("loginForm")
+  .addEventListener("submit", async function (e) {
+    e.preventDefault();
 
-          try {
-            const res = await fetch(
-              "http://localhost:8080/forum/api/session/login",
-              {
-                method: "POST",
-                headers: {
-                  "Content-Type": "application/json",
-                  //"X-CSRF-Token": sessionStorage.getItem("csrf_token"),
-                },
-                // 💡 Important: Include credentials to allow cookies to be set
-                credentials: "include", // 💡 important: allows cookies to be set
-                body: JSON.stringify({ email, password }),
-              }
-            );
+    const email = document.getElementById("email").value;
+    const password = document.getElementById("password").value;
+    const message = document.getElementById("message");
 
-            if (!res.ok) {
-              const errText = await res.text();
-              throw new Error(errText);
-            }
+    message.textContent = "";
+    message.style.color = "red";
 
-            const result = await res.json();
-            message.style.color = "green";
-            message.textContent = "Login successful!";
-            // ✅ Store CSRF token in sessionStorage (or localStorage if session is not enough)
-            sessionStorage.setItem("csrf_token", result.csrf_token);
-            // Let other tabs know the session is active
-            localStorage.setItem("session_status", JSON.stringify({ status: "logged_in", timestamp: Date.now() }));
+    try {
+      await loadConfig();
+      const res = await fetch(API_CONFIG.LoginURI, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          //"X-CSRF-Token": sessionStorage.getItem("csrf_token"),
+        },
+        // 💡 Important: Include credentials to allow cookies to be set
+        credentials: "include", // 💡 important: allows cookies to be set
+        body: JSON.stringify({ email, password }),
+      });
 
-            window.location.href = "/user";
-          } catch (err) {
-            message.textContent = "Error: " + err.message;
-          }
-        });
+      if (!res.ok) {
+        const errText = await res.text();
+        throw new Error(errText);
+      }
+
+      const result = await res.json();
+      message.style.color = "green";
+      message.textContent = "Login successful!";
+      // ✅ Store CSRF token in sessionStorage (or localStorage if session is not enough)
+      sessionStorage.setItem("csrf_token", result.csrf_token);
+      // Let other tabs know the session is active
+      localStorage.setItem(
+        "session_status",
+        JSON.stringify({ status: "logged_in", timestamp: Date.now() })
+      );
+
+      window.location.href = "/user";
+    } catch (err) {
+      message.textContent = "Error: " + err.message;
+    }
+  });
