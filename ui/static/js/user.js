@@ -1,3 +1,8 @@
+// Hide body immediately via injected style to avoid FOUC
+const style = document.createElement("style");
+style.innerHTML = "body { display: none !important; }";
+document.head.appendChild(style);
+
 function countReactions(reactions = []) {
   if (!Array.isArray(reactions)) reactions = [];
   return {
@@ -6,25 +11,62 @@ function countReactions(reactions = []) {
   };
 }
 
-document.addEventListener("DOMContentLoaded", async () => {
+document.addEventListener("DOMContentLoaded", () => {
+  // Attach logout handler after DOM is loaded
+  const logoutLink = document.getElementById("logout-link");
+  if (logoutLink) {
+    logoutLink.addEventListener("click", async (e) => {
+      e.preventDefault();
+      try {
+        const res = await fetch("http://localhost:8080/forum/api/session/logout", {
+          method: "POST",
+          credentials: "include",
+        });
+
+        if (!res.ok) throw new Error("Logout failed");
+
+        // Optionally, clear CSRF token and local data
+        sessionStorage.removeItem("csrf_token");
+
+        // Redirect to login
+        window.location.href = "/login";
+      } catch (err) {
+        console.error("Logout failed:", err);
+        alert("Logout failed. Please try again.");
+      }
+    });
+  }
+  // Initialize forum only after session verification
+  init();
+});
+
+async function init() {
   try {
     const res = await fetch("http://localhost:8080/forum/api/session/verify", {
-    credentials: "include",
-  });
-if (!res.ok) throw new Error("Not authenticated");
+      credentials: "include",
+    });
+    if (!res.ok) throw new Error("Not authenticated");
 
-// Defensive JSON parse
-const contentType = res.headers.get("content-type") || "";
-if (!contentType.includes("application/json")) {
-  throw new Error("Expected JSON response");
-}
-const sessionData = await res.json();
-console.log("Welcome", sessionData.user);
+    const contentType = res.headers.get("content-type") || "";
+    if (!contentType.includes("application/json")) {
+      throw new Error("Expected JSON response");
+    }
+    const sessionData = await res.json();
+    console.log("Welcome", sessionData.user);
+
+    // Remove the injected style to reveal UI
+    const injectedStyle = document.head.querySelector("style");
+    if (injectedStyle) injectedStyle.remove();
+    document.body.style.display = ""; // Show UI
+
+    await setupForum(); // Proceed with rest of logic
+
   } catch (err) {
     window.location.href = "/login";
-    return; // Stop further execution
   }
+}
 
+async function setupForum() {
   async function handleReaction(
     targetId,
     targetType,
@@ -181,9 +223,9 @@ console.log("Welcome", sessionData.user);
                 method: "POST",
                 credentials: "include",
                 headers: {
-  "Content-Type": "application/json",
-  "X-CSRF-Token": sessionStorage.getItem("csrf_token"),
-},
+                  "Content-Type": "application/json",
+                  "X-CSRF-Token": sessionStorage.getItem("csrf_token"),
+                },
                 body: JSON.stringify({
                   post_id: post.id,
                   content: content,
@@ -287,17 +329,13 @@ console.log("Welcome", sessionData.user);
   try {
     // 1. Fetch categories only for tabs
     const categoryRes = await fetch(
-      "http://localhost:8080/forum/api/categories"
+      "http://localhost:8080/forum/api/categories",
+      { credentials: "include" }
     );
     if (!categoryRes.ok) throw new Error("Failed to fetch categories");
     const categories = await categoryRes.json();
 
-    // 2. Fetch guest data with posts and comments
-    const guestRes = await fetch("http://localhost:8080/forum/api/guest");
-    if (!guestRes.ok) throw new Error("Failed to fetch guest data");
-    const guestData = await guestRes.json();
-
-    // 3. Use categories ONLY for tabs
+    // 2. Use categories ONLY for tabs
     categoryTabs.innerHTML = "";
     categories.forEach((category) => {
       const tabItem = document.createElement("li");
@@ -320,38 +358,16 @@ console.log("Welcome", sessionData.user);
       categoryTabs.appendChild(tabItem);
     });
 
-    // 4. Use guestData as your data source for categories + posts
-    data = guestData;
+    // Use authenticated user data endpoint
+    const userDataRes = await fetch("http://localhost:8080/forum/api/guest", {
+      credentials: "include",
+    });
+    if (!userDataRes.ok) throw new Error("Failed to fetch user data");
+    data = await userDataRes.json();
 
-    // 5. Render all posts initially
+    // 3. Render all posts initially
     renderAllPosts();
   } catch (err) {
     console.error("Error fetching forum data:", err);
   }
-});
-
-
-const logoutLink = document.getElementById("logout-link");
-
-if (logoutLink) {
-  logoutLink.addEventListener("click", async (e) => {
-    e.preventDefault();
-    try {
-      const res = await fetch("http://localhost:8080/forum/api/session/logout", {
-        method: "POST",
-        credentials: "include",
-      });
-
-      if (!res.ok) throw new Error("Logout failed");
-
-      // Optionally, clear CSRF token
-      sessionStorage.removeItem("csrf_token");
-
-      // Redirect to login
-      window.location.href = "/login";
-    } catch (err) {
-      console.error("Logout failed:", err);
-      alert("Logout failed. Please try again.");
-    }
-  });
 }
