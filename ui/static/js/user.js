@@ -7,19 +7,28 @@ function countReactions(reactions = []) {
 }
 
 document.addEventListener("DOMContentLoaded", async () => {
-  try {
-    const res = await fetch("http://localhost:8080/forum/api/session/verify", {
-    credentials: "include",
-  });
-if (!res.ok) throw new Error("Not authenticated");
+  let API_CONFIG;
 
-// Defensive JSON parse
-const contentType = res.headers.get("content-type") || "";
-if (!contentType.includes("application/json")) {
-  throw new Error("Expected JSON response");
-}
-const sessionData = await res.json();
-console.log("Welcome", sessionData.user);
+  async function loadConfig() {
+    const res = await fetch("/config");
+    if (!res.ok) throw new Error("Failed to load config");
+    API_CONFIG = await res.json();
+  }
+
+  try {
+    await loadConfig();
+    const res = await fetch(API_CONFIG.AuthURI, {
+      credentials: "include",
+    });
+    if (!res.ok) throw new Error("Not authenticated");
+
+    // Defensive JSON parse
+    const contentType = res.headers.get("content-type") || "";
+    if (!contentType.includes("application/json")) {
+      throw new Error("Expected JSON response");
+    }
+    const sessionData = await res.json();
+    console.log("Welcome", sessionData.user);
   } catch (err) {
     window.location.href = "/login";
     return; // Stop further execution
@@ -33,7 +42,8 @@ console.log("Welcome", sessionData.user);
     dislikeBtn
   ) {
     try {
-      const res = await fetch("http://localhost:8080/forum/api/react", {
+      await loadConfig();
+      const res = await fetch(API_CONFIG.ReactionsURI, {
         method: "POST",
         credentials: "include",
         headers: {
@@ -175,21 +185,19 @@ console.log("Welcome", sessionData.user);
           const content = textarea.value.trim();
           if (!content) return;
           try {
-            const res = await fetch(
-              "http://localhost:8080/forum/api/comments",
-              {
-                method: "POST",
-                credentials: "include",
-                headers: {
-  "Content-Type": "application/json",
-  "X-CSRF-Token": sessionStorage.getItem("csrf_token"),
-},
-                body: JSON.stringify({
-                  post_id: post.id,
-                  content: content,
-                }),
-              }
-            );
+            await loadConfig();
+            const res = await fetch(API_CONFIG.CommentsURI, {
+              method: "POST",
+              credentials: "include",
+              headers: {
+                "Content-Type": "application/json",
+                "X-CSRF-Token": sessionStorage.getItem("csrf_token"),
+              },
+              body: JSON.stringify({
+                post_id: post.id,
+                content: content,
+              }),
+            });
             if (!res.ok) throw new Error("Failed to post comment");
             const newComment = await res.json();
             textarea.value = "";
@@ -285,15 +293,14 @@ console.log("Welcome", sessionData.user);
   }
 
   try {
+    await loadConfig();
     // 1. Fetch categories only for tabs
-    const categoryRes = await fetch(
-      "http://localhost:8080/forum/api/categories"
-    );
+    const categoryRes = await fetch(API_CONFIG.CategoriesURI);
     if (!categoryRes.ok) throw new Error("Failed to fetch categories");
     const categories = await categoryRes.json();
 
     // 2. Fetch guest data with posts and comments
-    const guestRes = await fetch("http://localhost:8080/forum/api/guest");
+    const guestRes = await fetch(API_CONFIG.DataURI);
     if (!guestRes.ok) throw new Error("Failed to fetch guest data");
     const guestData = await guestRes.json();
 
@@ -328,30 +335,30 @@ console.log("Welcome", sessionData.user);
   } catch (err) {
     console.error("Error fetching forum data:", err);
   }
+
+  const logoutLink = document.getElementById("logout-link");
+
+  if (logoutLink) {
+    logoutLink.addEventListener("click", async (e) => {
+      e.preventDefault();
+      try {
+        await loadConfig();
+        const res = await fetch(API_CONFIG.LogoutURI, {
+          method: "POST",
+          credentials: "include",
+        });
+
+        if (!res.ok) throw new Error("Logout failed");
+
+        // Optionally, clear CSRF token
+        sessionStorage.removeItem("csrf_token");
+
+        // Redirect to login
+        window.location.href = "/login";
+      } catch (err) {
+        console.error("Logout failed:", err);
+        alert("Logout failed. Please try again.");
+      }
+    });
+  }
 });
-
-
-const logoutLink = document.getElementById("logout-link");
-
-if (logoutLink) {
-  logoutLink.addEventListener("click", async (e) => {
-    e.preventDefault();
-    try {
-      const res = await fetch("http://localhost:8080/forum/api/session/logout", {
-        method: "POST",
-        credentials: "include",
-      });
-
-      if (!res.ok) throw new Error("Logout failed");
-
-      // Optionally, clear CSRF token
-      sessionStorage.removeItem("csrf_token");
-
-      // Redirect to login
-      window.location.href = "/login";
-    } catch (err) {
-      console.error("Logout failed:", err);
-      alert("Logout failed. Please try again.");
-    }
-  });
-}
