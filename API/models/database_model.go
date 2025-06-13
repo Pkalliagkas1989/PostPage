@@ -77,13 +77,14 @@ func createTables(db *sql.DB) error {
 
 	// Define all table creation SQL statements
 	tableStatements := []string{
-		config.CreateUserTable,
-		config.CreateUserAuthTable,
-		config.CreateSessionsTable,
-		config.CreateCategoriesTable,
-		config.CreatePostsTable,
-		config.CreateCommentsTable,
-		config.CreateReactionsTable,
+		config.IdxPostsUserID,
+		config.IdxPostCategoriesPostID,
+		config.IdxPostCategoriesCategoryID,
+		config.IdxCommentsPostID,
+		config.IdxCommentsUserID,
+		config.IdxReactionsUserID,
+		config.IdxReactionsPostID,
+		config.IdxReactionsCommentID,
 	}
 
 	// Execute each table creation statement
