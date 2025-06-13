@@ -78,3 +78,13 @@ curl -X POST http://localhost:8080/forum/api/react \
 ```
 Reaction type `1` represents a like and `2` represents a dislike. Running the
 command again with the same parameters will toggle the reaction off.
+
+# DOCKER
+
+- On root directory
+
+`
+docker compose up --build
+docker compose up
+`
+
