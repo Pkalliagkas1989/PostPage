@@ -61,7 +61,7 @@ document
         JSON.stringify({ status: "logged_in", timestamp: Date.now() })
       );
 
-      window.location.href = "/user";
+      window.location.replace("/user");
     } catch (err) {
       let errorMessage = "Unknown error";
 

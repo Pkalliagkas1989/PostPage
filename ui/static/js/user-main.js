@@ -12,6 +12,13 @@ import { initModal } from "./modal.js";
   const authGuard = new AuthGuard();
   const configManager = new ConfigManager();
 
+  history.replaceState(null, "", location.href);
+  history.pushState(null, "", location.href);
+
+  window.addEventListener("popstate", () => {
+    history.pushState(null, "/user", location.href);
+  });
+
   try {
     // Load configuration and check authentication
     await configManager.loadConfig();
