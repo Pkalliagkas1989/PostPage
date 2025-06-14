@@ -39,6 +39,7 @@ func main() {
 			"CategoriesURI": CategoriesURI,
 			"ReactionsURI":  ReactionsURI,
 			"CommentsURI":   CommentsURI,
+			"CreatePostURI": CreatePostURI,
 		}
 		json.NewEncoder(w).Encode(config)
 	})

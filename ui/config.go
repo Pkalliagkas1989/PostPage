@@ -10,4 +10,5 @@ var (
 	CategoriesURI = APIBaseURL + "/categories"
 	ReactionsURI  = APIBaseURL + "/react"
 	CommentsURI   = APIBaseURL + "/comments"
+	CreatePostURI = APIBaseURL + "/posts/create"
 )
