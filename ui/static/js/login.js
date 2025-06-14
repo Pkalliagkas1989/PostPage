@@ -63,6 +63,17 @@ document
 
       window.location.href = "/user";
     } catch (err) {
-      message.textContent = "Error: " + err.message;
+      let errorMessage = "Unknown error";
+
+      try {
+        // Try to parse the message if it's JSON
+        const parsed = JSON.parse(err.message);
+        errorMessage = parsed.message || errorMessage;
+      } catch (e) {
+        // If it's not JSON, just use it as-is
+        errorMessage = err.message;
+      }
+
+      message.textContent = "Error: " + errorMessage;
     }
   });
