@@ -25,13 +25,12 @@ class AuthGuard {
         throw new Error("Expected JSON response");
       }
       const sessionData = await res.json();
-      
+
       // Remove injected style to reveal page
       const guardStyle = document.getElementById("auth-guard-style");
       if (guardStyle) guardStyle.remove();
       document.body.style.display = "";
-      console.log("Welcome", sessionData.user);
-      
+
       return true;
     } catch (err) {
       window.location.href = "/login";
