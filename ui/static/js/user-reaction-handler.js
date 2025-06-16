@@ -1,4 +1,4 @@
-import { countReactions } from './user-utils.js';
+import { countReactions } from "./user-utils.js";
 
 // Reaction handling functionality
 class ReactionHandler {
@@ -7,11 +7,17 @@ class ReactionHandler {
     this.dataManager = dataManager;
   }
 
-  async handleReaction(targetId, targetType, reactionType, likeBtn, dislikeBtn) {
+  async handleReaction(
+    targetId,
+    targetType,
+    reactionType,
+    likeBtn,
+    dislikeBtn
+  ) {
     try {
       await this.configManager.loadConfig();
       const API_CONFIG = this.configManager.getConfig();
-      
+
       const res = await fetch(API_CONFIG.ReactionsURI, {
         method: "POST",
         credentials: "include",
@@ -40,6 +46,7 @@ class ReactionHandler {
       } else if (targetType === "comment") {
         for (const category of data.categories) {
           for (const post of category.posts) {
+            if (!Array.isArray(post.comments)) continue;
             const comment = post.comments.find((c) => c.id === targetId);
             if (comment) comment.reactions = updatedReactions;
           }
