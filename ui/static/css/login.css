@@ -82,16 +82,19 @@
       background-image: var(--gradient-main);
       color: rgb(0, 0, 0);
       margin-bottom: 1em;
+      cursor: pointer;
     }
   
       .button1:hover {
         background-image: var(--gradient-main);
         color: rgb(0, 255, 200);
+        cursor: pointer;
       }
   
       .button3:hover {
         background-image: var(--gradient-main);
         color: rgb(0, 255, 200);
+        cursor: pointer;
       }
   
       .card {
