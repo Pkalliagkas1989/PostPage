@@ -89,8 +89,8 @@ class NavigationHandler {
         // Add active class to clicked link
         link.classList.add("active");
 
-        // Close dropdown
-        this.closeDropdown();
+        // Close dropdown 
+        // this.closeDropdown();
 
         // Render posts for this category
         this.forumRenderer.renderPostsForCategory(category.id);
@@ -124,11 +124,11 @@ class NavigationHandler {
     const categoryTabs = document.getElementById("category-tabs");
     const arrow = document.querySelector('.dropdown-arrow');
     
-    // if (categoryTabs && arrow) {
-    //   categoryTabs.classList.remove('open');
-    //   arrow.style.transform = 'rotate(0deg)';
-    //   this.isDropdownOpen = false;
-    // }
+    if (categoryTabs && arrow) {
+      categoryTabs.classList.remove('open');
+      arrow.style.transform = 'rotate(0deg)';
+      this.isDropdownOpen = false;
+    }
   }
 
   setupLogoutLink() {
