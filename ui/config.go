@@ -11,4 +11,5 @@ var (
 	ReactionsURI  = APIBaseURL + "/react"
 	CommentsURI   = APIBaseURL + "/comments"
 	CreatePostURI = APIBaseURL + "/posts/create"
+	MyPostsURI    = APIBaseURL + "/user/posts"
 )
