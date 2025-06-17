@@ -6,6 +6,20 @@ async function loadConfig() {
   API_CONFIG = await res.json();
 }
 
+window.addEventListener("pageshow", function (event) {
+  const form = document.getElementById("loginForm");
+  if (form) {
+    form.reset(); // Clears all inputs
+    const message = document.getElementById("message");
+    if (message) {
+      message.textContent = "";
+    }
+
+    // Optional: clear stored credentials
+    // sessionStorage.removeItem("csrf_token");
+  }
+});
+
 document
   .getElementById("loginForm")
   .addEventListener("submit", async function (e) {
@@ -47,8 +61,19 @@ document
         JSON.stringify({ status: "logged_in", timestamp: Date.now() })
       );
 
-      window.location.href = "/user";
+      window.location.replace("/user");
     } catch (err) {
-      message.textContent = "Error: " + err.message;
+      let errorMessage = "Unknown error";
+
+      try {
+        // Try to parse the message if it's JSON
+        const parsed = JSON.parse(err.message);
+        errorMessage = parsed.message || errorMessage;
+      } catch (e) {
+        // If it's not JSON, just use it as-is
+        errorMessage = err.message;
+      }
+
+      message.textContent = "Error: " + errorMessage;
     }
   });

@@ -1,102 +1,27 @@
-document.addEventListener("DOMContentLoaded", () => {
-  const createBtn = document.getElementById("create-post-btn");
-  const modal = document.getElementById("post-modal");
-  const closeBtn = document.querySelector(".close-btn");
-  const submitBtn = document.getElementById("submit-post");
-  const postTitle = document.getElementById("post-title");
-  const postBody = document.getElementById("post-body");
-  const commentBtn = document.getElementById("comment-btn");
-
-  createBtn.onclick = () => {
-    modal.classList.remove("hidden");
-  };
-
-  closeBtn.onclick = () => {
-    modal.classList.add("hidden");
-  };
-
-  submitBtn.onclick = async () => {
-  console.log("Submit button clicked");
-  const title = postTitle.value.trim();
-  const content = postBody.value.trim();
-
-  const checkedCategories = document.querySelectorAll('input[name="categories"]:checked');
-  const categoryContainer = document.getElementById("post-category");
-
-  // Validate category selection
-  if (checkedCategories.length === 0) {
-    const existingWarning = document.getElementById("category-warning");
-    if (!existingWarning) {
-      const warning = document.createElement("div");
-      warning.id = "category-warning";
-      warning.textContent = "Please select at least one category";
-      warning.style.color = "red";
-      warning.style.marginTop = "5px";
-      categoryContainer.appendChild(warning);
-    }
-    return;
-  } else {
-    const existingWarning = document.getElementById("category-warning");
-    if (existingWarning) existingWarning.remove();
+class Modal {
+  constructor(API_CONFIG) {
+    this.API_CONFIG = API_CONFIG;
+    this.init();
   }
 
-  // Collect selected category IDs
-  const categoryIds = Array.from(checkedCategories).map(checkbox =>
-    parseInt(checkbox.value, 10)
-  );
+  async init() {
+    const createBtn = document.getElementById("create-post-btn");
+    const modal = document.getElementById("post-modal");
+    const closeBtn = document.querySelector(".close-btn");
+    const submitBtn = document.getElementById("submit-post");
+    const postTitle = document.getElementById("post-title");
+    const postBody = document.getElementById("post-body");
 
-  if (!title || !content || categoryIds.length === 0) return;
+    createBtn.onclick = () => modal.classList.remove("hidden");
+    closeBtn.onclick = () => modal.classList.add("hidden");
+    submitBtn.onclick = () => this.handleSubmit(postTitle, postBody, modal);
 
-  // Session verification
-  try {
-    const res = await fetch("http://localhost:8080/forum/api/session/verify", {
-      credentials: "include",
-    });
-    if (!res.ok) throw new Error("Not authenticated");
-    const sessionData = await res.json();
-    console.log("Welcome", sessionData.user);
-  } catch (err) {
-    window.location.href = "/login";
-    return;
+    await this.populateCategories();
   }
 
-  // Submit post
-  try {
-    const response = await fetch("http://localhost:8080/forum/api/posts/create", {
-      method: "POST",
-      headers: {
-  "Content-Type": "application/json",
-  "X-CSRF-Token": sessionStorage.getItem("csrf_token"),
-},
-      credentials: "include",
-      body: JSON.stringify({
-        title: title,
-        content: content,
-        category_ids: categoryIds // ✅ now sending an array
-      })
-    });
-
-    if (!response.ok) {
-      throw new Error(`Server error: ${response.status}`);
-    }
-
-    const result = await response.json();
-    console.log("Post created successfully:", result);
-
-    // Cleanup
-    postTitle.value = "";
-    postBody.value = "";
-    modal.classList.add("hidden");
-    window.location.reload();
-  } catch (error) {
-    console.error("Error creating post:", error);
-  }
-};
-
-
-  async function populateCategories() {
+  async populateCategories() {
     try {
-      const response = await fetch("http://localhost:8080/forum/api/categories");
+      const response = await fetch(this.API_CONFIG.CategoriesURI);
       const data = await response.json();
 
       const container = document.getElementById("post-category");
@@ -125,5 +50,76 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   }
 
-  populateCategories();
-});
+  async handleSubmit(postTitle, postBody, modal) {
+    const title = postTitle.value.trim();
+    const content = postBody.value.trim();
+    const checkedCategories = document.querySelectorAll(
+      'input[name="categories"]:checked'
+    );
+    const categoryContainer = document.getElementById("post-category");
+
+    if (checkedCategories.length === 0) {
+      if (!document.getElementById("category-warning")) {
+        const warning = document.createElement("div");
+        warning.id = "category-warning";
+        warning.textContent = "Please select at least one category";
+        warning.style.color = "red";
+        warning.style.marginTop = "5px";
+        categoryContainer.appendChild(warning);
+      }
+      return;
+    } else {
+      const warning = document.getElementById("category-warning");
+      if (warning) warning.remove();
+    }
+
+    const categoryIds = Array.from(checkedCategories).map((cb) =>
+      parseInt(cb.value, 10)
+    );
+    if (!title || !content || categoryIds.length === 0) return;
+
+    try {
+      const res = await fetch(this.API_CONFIG.AuthURI, {
+        credentials: "include",
+      });
+      if (!res.ok) throw new Error("Not authenticated");
+      await res.json();
+    } catch (err) {
+      window.location.href = "/login";
+      return;
+    }
+
+    try {
+      const response = await fetch(this.API_CONFIG.CreatePostURI, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "X-CSRF-Token": sessionStorage.getItem("csrf_token"),
+        },
+        credentials: "include",
+        body: JSON.stringify({
+          title,
+          content,
+          category_ids: categoryIds,
+        }),
+      });
+
+      if (!response.ok) throw new Error(`Server error: ${response.status}`);
+
+      const result = await response.json();
+      console.log("Post created successfully:", result);
+
+      postTitle.value = "";
+      postBody.value = "";
+      modal.classList.add("hidden");
+      window.location.reload();
+    } catch (error) {
+      console.error("Error creating post:", error);
+    }
+  }
+}
+
+// ✅ Export this
+export function initModal(API_CONFIG) {
+  new Modal(API_CONFIG);
+}

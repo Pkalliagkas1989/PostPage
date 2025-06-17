@@ -6,15 +6,12 @@
     <title>Forum Feed</title>
     <link rel="stylesheet" href="/static/css/user.css" />
     <link rel="stylesheet" href="/static/css/modal.css" />
-    <script src="/static/js/user.js" defer></script>
-    <script src="/static/js/modal.js" defer></script>
   </head>
   <body>
     <nav class="navbar">
       <a class="navbar-brand">Forum</a>
       <ul class="navbar-links">
         <li><a href="#" id="logout-link">Logout</a></li>
-
       </ul>
     </nav>
 
@@ -26,8 +23,8 @@
         <li>
           <ul id="category-tabs" class="category-tabs"></ul>
         </li>
-        <li><a href="#">Created Posts</a></li>
-        <li><a href="#">Liked Posts</a></li>
+        <li><a href="#" id="created-posts-link">Created Posts</a></li>
+        <li><a href="#" id="liked-posts-link">Liked Posts</a></li>
       </ul>
       <div class="side-glow"></div>
     </nav>
@@ -86,5 +83,6 @@
         <button id="submit-post">Submit</button>
       </div>
     </div>
+    <script src="/static/js/user-main.js" type="module"></script>
   </body>
 </html>

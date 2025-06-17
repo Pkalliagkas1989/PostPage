@@ -49,10 +49,12 @@ func main() {
 			"CategoriesURI": CategoriesURI,
 			"ReactionsURI":  ReactionsURI,
 			"CommentsURI":   CommentsURI,
+			"CreatePostURI": CreatePostURI,
+			"MyPostsURI":    MyPostsURI,
+			"LikedPostsURI": LikedPostsURI,
 		}
 		json.NewEncoder(w).Encode(config)
 	})
-	
 
 	// Start the server
 	log.Println("Serving on http://localhost:8081/")
