@@ -1,8 +1,38 @@
+@font-face {
+    font-family: 'Open Sans';
+    src: url('/fonts/OpenSans-VariableFont_wdth,wght.ttf') format('truetype');
+    font-weight: 100 900;
+    font-style: normal;
+}
+
 /* Color Variables */
 :root {
-  --color-primary: #00ff75;
-  --color-secondary: #3700ff;
-  --gradient-main: linear-gradient(163deg, var(--color-primary) 0%, var(--color-secondary) 100%);
+    /* Refined black & pink-purple neon theme */
+    --color-primary: #ffffff;
+    --color-secondary: #d946ef;  /* Vivid Pink */
+    --color-tertiary: #a855f7;  /* Orchid Purple */
+    --color-quaternary: #c084fc; /* Light Lavender */
+    --color-accent: #f472b6;  /* Soft Pink Accent */
+    --color-warning: #fb7185; /* Warm Coral Red */
+
+    /* Backgrounds */
+    --bg-primary: #0b0b0f;   /* Deep black-blue */
+    --bg-secondary: #13131a; /* Softened dark */
+    --bg-tertiary: #1c1c27;  /* Dark card base */
+    --bg-quaternary: #2c2c3a;/* Muted dark side */
+
+    /* Text colors */
+    --text-primary: #ffffff;
+    --text-secondary: #f3e8ff;
+    --text-muted: #d8b4fe;
+    --text-dark: #a78bfa;
+
+    /* Gradients */
+    --gradient-main: linear-gradient(135deg, #d946ef 0%, #a855f7 50%, #c084fc 100%);
+    --gradient-accent: linear-gradient(45deg, #f472b6 0%, #a855f7 100%);
+    --gradient-glow: radial-gradient(circle, #d946ef 0%, transparent 70%);
+    --gradient-crossing: linear-gradient(45deg, #d946ef 0%, transparent 30%, transparent 70%, #a855f7 100%),
+                         linear-gradient(-45deg, #f472b6 0%, transparent 30%, transparent 70%, #c084fc 100%);
 }
 
 /* Reset */
@@ -14,10 +44,10 @@
   
   body, html {
     height: 100%;
-    font-family: 'Segoe UI', sans-serif;
-    color: white;
+    font-family: 'Open Sans', sans-serif;
+    color: var(--text-primary);
     overflow-x: hidden;
-    background: #000;
+    background: var(--bg-primary);
   }
   
   .hero {
@@ -66,7 +96,7 @@
   .subtext {
     font-size: 0.9rem;
     letter-spacing: 1px;
-    color: #888;
+    color: var(--text-muted);
     margin-bottom: 1rem;
   }
   
@@ -77,24 +107,65 @@
   
   .signup-box .desc {
     font-size: 1rem;
-    color: #bbb;
+    color: var(--text-secondary);
     margin-bottom: 2rem;
   }
   
+  .signup-btn,
+  .btn,
+  .primary,
+  .secondary,
+  .ghost {
+    transition: all 0.3s ease-in-out;
+    position: relative;
+    overflow: hidden;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+    box-shadow: 0 3px 12px rgba(139, 92, 246, 0.4);
+  }
+
+  .signup-btn::before,
+  .btn::before,
+  .primary::before,
+  .secondary::before,
+  .ghost::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+    transition: left 0.5s ease;
+  }
+  
   .signup-btn {
-    background-image: var(--color-primary);
-    color: black;
+    background-image: var(--gradient-main);
+    color: var(--bg-primary);
     border: none;
     padding: 0.8rem 1.5rem;
     font-size: 1rem;
     border-radius: 6px;
     cursor: pointer;
-    transition: 0.3s;
   }
 
-  .signup-btn:hover {
-    filter: brightness(1.1);
+  .signup-btn:hover,
+  .btn:hover,
+  .primary:hover,
+  .secondary:hover,
+  .ghost:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 6px 20px rgba(139, 92, 246, 0.5);
+    background-image: var(--gradient-accent);
   }
+
+  .signup-btn:hover::before,
+  .btn:hover::before,
+  .primary:hover::before,
+  .secondary:hover::before,
+  .ghost:hover::before {
+    left: 100%;
+  }
+  
   .button-group {
     display: flex;
     gap: 1rem;
@@ -107,42 +178,26 @@
     font-size: 1rem;
     border-radius: 6px;
     font-weight: 500;
-    transition: background 0.3s, color 0.3s, filter 0.3s;
   }
 
   .primary {
     background-image: var(--gradient-main);
-    color: black;
+    color: var(--bg-primary);
   }
 
-  .primary:hover {
-    filter: brightness(1.1);
-    box-shadow: 0 0 10px var(--color-primary);
-  }
-  
   .secondary {
     background-image: var(--gradient-main);
-    color: black;
+    color: var(--bg-primary);
     border: none;
   }
-  
-  .secondary:hover {
-    filter: brightness(1.1);
-    box-shadow: 0 0 10px var(--color-primary);
-  }
 
-  .btn:hover {
-    filter: brightness(1.1);
-    box-shadow: 0 0 10px var(--color-primary);
-  }
-  
   .ghost {
-    background: transparent;
-    color: #aaa;
-    border: 1px solid #666;
+    background-image: var(--gradient-main);
+    color: var(--bg-primary);
+    border: none;
   }
   
   .ghost:hover {
     background: #111;
-    color: white;
+    color: var(--text-primary);
   }
