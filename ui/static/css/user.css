@@ -1,3 +1,10 @@
+@font-face {
+    font-family: 'Share Tech Mono';
+    src: url('../fonts/Open_Sans/OpenSans-VariableFont_wdth\,wght.ttf') format('truetype');
+    font-weight: normal;
+    font-style: normal;
+}
+
 :root {
     /* Refined black & pink-purple neon theme */
     --color-primary: #ffffff;
@@ -37,7 +44,7 @@ html {
 
 body {
     background-color: var(--bg-primary);
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    font-family: 'Share Tech Mono', monospace;
     margin: 0;
     display: flex;
     flex-direction: column;
