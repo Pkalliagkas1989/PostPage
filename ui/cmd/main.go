@@ -5,17 +5,7 @@ import (
 	"log"
 	"net/http"
 )
-var (
-	APIBaseURL    = "http://localhost:8080/forum/api"
-	AuthURI       = APIBaseURL + "/session/verify"
-	DataURI       = APIBaseURL + "/guest"
-	LoginURI      = APIBaseURL + "/session/login"
-	LogoutURI     = APIBaseURL + "/session/logout"
-	RegisterURI   = APIBaseURL + "/register"
-	CategoriesURI = APIBaseURL + "/categories"
-	ReactionsURI  = APIBaseURL + "/react"
-	CommentsURI   = APIBaseURL + "/comments"
-)
+
 func main() {
 	// Serve static assets (css, js, images)
 	fs := http.FileServer(http.Dir("./static"))
