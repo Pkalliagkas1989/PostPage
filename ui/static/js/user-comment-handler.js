@@ -15,7 +15,29 @@ class CommentHandler {
         const textarea = document.createElement("textarea");
         textarea.placeholder = "Write your comment...";
         textarea.rows = 3;
-        textarea.style.width = "100%";
+        textarea.maxLength = 200;
+        textarea.classList.add("comment-input");
+
+        const counter = document.createElement("div");
+        counter.style.textAlign = "right";
+        counter.style.fontSize = "0.8em";
+        counter.style.color = "var(--text-muted)";
+        counter.style.marginTop = "0.3em";
+        textarea.parentNode?.appendChild(counter);
+
+        const MAX_LENGTH = 200;
+        textarea.addEventListener("input", () => {
+          const len = textarea.value.length;
+          counter.textContent = `${len} / ${MAX_LENGTH}`;
+          if (len > MAX_LENGTH) {
+            textarea.style.border = "1px solid var(--color-warning)";
+            counter.style.color = "var(--color-warning)";
+          } else {
+            textarea.style.border = "1px solid var(--bg-quaternary)";
+            counter.style.color = "var(--text-muted)";
+          }
+        });
+
         const submitBtn = document.createElement("button");
         submitBtn.textContent = "Submit Comment";
         submitBtn.classList.add("comment-btn");
@@ -50,6 +72,7 @@ class CommentHandler {
           }
         });
         commentInput.appendChild(textarea);
+        commentInput.appendChild(counter);
         commentInput.appendChild(submitBtn);
         postContainer.appendChild(commentInput);
       }
