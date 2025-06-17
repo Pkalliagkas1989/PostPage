@@ -266,6 +266,7 @@ body {
     text-shadow: 0 0 8px rgba(192, 132, 252, 0.7);
     filter: drop-shadow(0 0 5px rgba(192, 132, 252, 0.5));
     transform: translateX(8px);
+    text-align: center ;
 }
 
 .auth-only {
