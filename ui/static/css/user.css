@@ -5,34 +5,33 @@
     font-style: normal;
 }
 
-:root {
-    /* Refined black & pink-purple neon theme */
-    --color-primary: #ffffff;
-    --color-secondary: #d946ef;  /* Vivid Pink */
-    --color-tertiary: #a855f7;  /* Orchid Purple */
-    --color-quaternary: #c084fc; /* Light Lavender */
-    --color-accent: #f472b6;  /* Soft Pink Accent */
-    --color-warning: #fb7185; /* Warm Coral Red */
+    :root {
+      --color-primary: #ffffff;
+      --color-secondary: #b832d4;  /* Darker Vivid Pink */
+      --color-tertiary: #9333ea;   /* Darker Orchid Purple */
+      --color-quaternary: #a855f7; /* Slightly deeper Light Lavender */
+      --color-accent: #e879f9;     /* Deeper Soft Pink Accent */
+      --color-warning: #fb7185; /* Warm Coral Red */
 
-    /* Backgrounds */
-    --bg-primary: #0b0b0f;   /* Deep black-blue */
-    --bg-secondary: #13131a; /* Softened dark */
-    --bg-tertiary: #1c1c27;  /* Dark card base */
-    --bg-quaternary: #2c2c3a;/* Muted dark side */
+      /* Backgrounds */
+      --bg-primary: #0b0b0f;   /* Deep black-blue */
+      --bg-secondary: #13131a; /* Softened dark */
+      --bg-tertiary: #1c1c27;  /* Dark card base */
+      --bg-quaternary: #2c2c3a;/* Muted dark side */
 
-    /* Text colors */
-    --text-primary: #ffffff;
-    --text-secondary: #f3e8ff;
-    --text-muted: #d8b4fe;
-    --text-dark: #a78bfa;
+      /* Text colors */
+      --text-primary: #ffffff;
+      --text-secondary: #f3e8ff;
+      --text-muted: #d8b4fe;
+      --text-dark: #a78bfa;
 
-    /* Gradients */
-    --gradient-main: linear-gradient(135deg, #d946ef 0%, #a855f7 50%, #c084fc 100%);
-    --gradient-accent: linear-gradient(45deg, #f472b6 0%, #a855f7 100%);
-    --gradient-glow: radial-gradient(circle, #d946ef 0%, transparent 70%);
-    --gradient-crossing: linear-gradient(45deg, #d946ef 0%, transparent 30%, transparent 70%, #a855f7 100%),
-                         linear-gradient(-45deg, #f472b6 0%, transparent 30%, transparent 70%, #c084fc 100%);
-}
+      /* Gradients */
+      --gradient-main: linear-gradient(135deg, #b832d4 0%, #9333ea 50%, #a855f7 100%);
+      --gradient-accent: linear-gradient(45deg, #e879f9 0%, #9333ea 100%);
+      --gradient-glow: radial-gradient(circle, #b832d4 0%, transparent 70%);
+      --gradient-crossing: linear-gradient(45deg, #b832d4 0%, transparent 30%, transparent 70%, #9333ea 100%),
+                           linear-gradient(-45deg, #e879f9 0%, transparent 30%, transparent 70%, #a855f7 100%);
+    }
 
 *, *::before, *::after {
     box-sizing: inherit;
