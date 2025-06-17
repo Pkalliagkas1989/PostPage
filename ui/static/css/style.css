@@ -179,18 +179,18 @@
 
   .primary {
     background-image: var(--gradient-main);
-    color: var(--bg-primary);
+    color: var(--text-primary);
   }
 
   .secondary {
     background-image: var(--gradient-main);
-    color: var(--bg-primary);
+    color: var(--text-primary);
     border: none;
   }
 
   .ghost {
     background-image: var(--gradient-main);
-    color: var(--bg-primary);
+    color: var(--text-primary);
     border: none;
   }
   
