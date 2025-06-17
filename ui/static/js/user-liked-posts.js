@@ -2,28 +2,29 @@ function setupLikedPostsHandler(configManager, postRenderer) {
   const link = document.getElementById("liked-posts-link");
   if (!link) return;
 
-  link.addEventListener("click", async (event) => {
+  link.addEventListener("click", (event) => {
     event.preventDefault();
+    fetchAndRenderLikedPosts(configManager, postRenderer);
+  });
+}
 
-    const API_CONFIG = configManager.getConfig();
+function fetchAndRenderLikedPosts(configManager, postRenderer) {
+  const API_CONFIG = configManager.getConfig();
 
-    try {
-      const response = await fetch(API_CONFIG.LikedPostsURI, {
-        headers: {
-          "Content-Type": "application/json",
-        },
-        credentials: "include",
-      });
-
-      if (!response.ok) throw new Error("Failed to fetch posts.");
-
-      const posts = await response.json();
-
+  fetch(API_CONFIG.LikedPostsURI, {
+    headers: { "Content-Type": "application/json" },
+    credentials: "include",
+  })
+    .then((response) => {
+      if (!response.ok) throw new Error("Failed to fetch liked posts.");
+      return response.json();
+    })
+    .then((posts) => {
       const container = document.getElementById("forumContainer");
       const postTemplate = document.getElementById("post-template");
       const commentTemplate = document.getElementById("comment-template");
 
-      container.innerHTML = "";
+      container.innerHTML = ""; // clear old posts
 
       posts.forEach((post) => {
         const categoryName = post.category_name || "General";
@@ -33,13 +34,13 @@ function setupLikedPostsHandler(configManager, postRenderer) {
           postTemplate,
           container,
           categoryName,
-          () => {}
+          () => fetchAndRenderLikedPosts(configManager, postRenderer) // refresh callback
         );
       });
-    } catch (error) {
+    })
+    .catch((error) => {
       console.error("Error loading liked posts:", error);
-    }
-  });
+    });
 }
 
 export { setupLikedPostsHandler };
