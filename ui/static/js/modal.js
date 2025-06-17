@@ -17,6 +17,28 @@ class Modal {
     submitBtn.onclick = () => this.handleSubmit(postTitle, postBody, modal);
 
     await this.populateCategories();
+
+    const counter = document.createElement("div");
+    counter.style.textAlign = "right";
+    counter.style.fontSize = "0.8em";
+    counter.style.color = "var(--text-muted)";
+    counter.style.marginTop = "0.3em";
+    postBody.parentNode.appendChild(counter);
+
+    const MAX_LENGTH = 2000;
+
+    postBody.addEventListener("input", () => {
+      const len = postBody.value.length;
+      counter.textContent = `${len} / ${MAX_LENGTH}`;
+
+      if (len > MAX_LENGTH) {
+        postBody.style.border = "1px solid var(--color-warning)";
+        counter.style.color = "var(--color-warning)";
+      } else {
+        postBody.style.border = "1px solid var(--bg-quaternary)";
+        counter.style.color = "var(--text-muted)";
+      }
+    });
   }
 
   async populateCategories() {
