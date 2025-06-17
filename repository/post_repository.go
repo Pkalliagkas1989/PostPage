@@ -62,7 +62,7 @@ func (r *PostRepository) GetAllPosts() ([]models.Post, error) {
 }
 
 // Create inserts a new post into the database
-//func (r *PostRepository) Create(post models.Post) (*models.Post, error) {
+// func (r *PostRepository) Create(post models.Post) (*models.Post, error) {
 func (r *PostRepository) Create(post models.Post, categoryIDs []int) (*models.Post, error) {
 	post.ID = utils.GenerateUUID()
 	post.CreatedAt = time.Now()
@@ -113,4 +113,80 @@ func (r *PostRepository) Create(post models.Post, categoryIDs []int) (*models.Po
 	}
 
 	return &post, nil
+}
+
+func (r *PostRepository) GetPostsByUser(userID string) ([]models.PostWithUser, error) {
+	rows, err := r.db.Query(`
+        SELECT p.post_id, p.user_id, u.username, p.title, p.content, p.created_at
+        FROM posts p
+        JOIN user u ON p.user_id = u.user_id
+        WHERE p.user_id = ?
+        ORDER BY p.created_at DESC`, userID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var posts []models.PostWithUser
+	for rows.Next() {
+		var p models.PostWithUser
+		if err := rows.Scan(&p.ID, &p.UserID, &p.Username, &p.Title, &p.Content, &p.CreatedAt); err != nil {
+			return nil, err
+		}
+		posts = append(posts, p)
+	}
+	return posts, nil
+}
+
+func (r *PostRepository) GetCategoriesByPostID(postID string) ([]models.Category, error) {
+	rows, err := r.db.Query(`
+        SELECT c.category_id, c.name
+        FROM categories c
+        JOIN post_categories pc ON c.category_id = pc.category_id
+        WHERE pc.post_id = ?`, postID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var categories []models.Category
+	for rows.Next() {
+		var c models.Category
+		if err := rows.Scan(&c.ID, &c.Name); err != nil {
+			return nil, err
+		}
+		categories = append(categories, c)
+	}
+	return categories, nil
+}
+
+// GetPostsReactedByUser returns posts that the given user has reacted to either
+// directly or via reactions on comments. The posts are ordered by creation time
+// descending.
+func (r *PostRepository) GetPostsReactedByUser(userID string) ([]models.PostWithUser, error) {
+	query := `SELECT DISTINCT p.post_id, p.user_id, u.username, p.title, p.content, p.created_at
+                FROM posts p
+                JOIN user u ON p.user_id = u.user_id
+                WHERE p.post_id IN (
+                        SELECT post_id FROM reactions WHERE user_id = ? AND post_id IS NOT NULL
+                        UNION
+                        SELECT c.post_id FROM reactions r JOIN comments c ON r.comment_id = c.comment_id WHERE r.user_id = ?
+                )
+                ORDER BY p.created_at DESC`
+
+	rows, err := r.db.Query(query, userID, userID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var posts []models.PostWithUser
+	for rows.Next() {
+		var p models.PostWithUser
+		if err := rows.Scan(&p.ID, &p.UserID, &p.Username, &p.Title, &p.Content, &p.CreatedAt); err != nil {
+			return nil, err
+		}
+		posts = append(posts, p)
+	}
+	return posts, nil
 }
