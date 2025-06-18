@@ -25,6 +25,7 @@ class DisabledCommentHandler {
   const navigationHandler = new NavigationHandler(forumRenderer, configManager);
 
   navigationHandler.setupMyFeedLink();
+  navigationHandler.setupCategoryTabs([]);
 
   try {
     const API_CONFIG = configManager.getConfig();
