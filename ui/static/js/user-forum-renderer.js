@@ -65,7 +65,11 @@ class ForumRenderer {
       category.name;
     const postsContainer = categoryElement.querySelector(".category-posts");
 
-    category.posts.forEach((post) => {
+    const sortedPosts = [...category.posts].sort(
+      (a, b) => new Date(b.created_at) - new Date(a.created_at)
+    );
+
+    sortedPosts.forEach((post) => {
       this.postRenderer.renderPost(
         post,
         commentTemplate,
