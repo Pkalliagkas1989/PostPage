@@ -19,6 +19,7 @@ var (
 	CreatePostURI = APIBaseURL + "/posts/create"
 	MyPostsURI    = APIBaseURL + "/user/posts"
 	LikedPostsURI = APIBaseURL + "/user/liked"
+	PostURI       = APIBaseURL + "/posts/"
 )
 
 func main() {
@@ -36,16 +37,16 @@ func main() {
 	http.HandleFunc("/register", func(w http.ResponseWriter, r *http.Request) {
 		http.ServeFile(w, r, "./static/templates/register.html")
 	})
-        http.HandleFunc("/guest", func(w http.ResponseWriter, r *http.Request) {
-                http.ServeFile(w, r, "./static/templates/guest.html")
-        })
-        http.HandleFunc("/user", func(w http.ResponseWriter, r *http.Request) {
-                http.ServeFile(w, r, "./static/templates/user.html")
-        })
-        http.HandleFunc("/post", func(w http.ResponseWriter, r *http.Request) {
-                http.ServeFile(w, r, "./static/templates/post.html")
-        })
-        http.HandleFunc("/config", func(w http.ResponseWriter, r *http.Request) {
+	http.HandleFunc("/guest", func(w http.ResponseWriter, r *http.Request) {
+		http.ServeFile(w, r, "./static/templates/guest.html")
+	})
+	http.HandleFunc("/user", func(w http.ResponseWriter, r *http.Request) {
+		http.ServeFile(w, r, "./static/templates/user.html")
+	})
+	http.HandleFunc("/post", func(w http.ResponseWriter, r *http.Request) {
+		http.ServeFile(w, r, "./static/templates/post.html")
+	})
+	http.HandleFunc("/config", func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
 		config := map[string]string{
 			"APIBaseURL":    APIBaseURL,
@@ -60,6 +61,7 @@ func main() {
 			"CreatePostURI": CreatePostURI,
 			"MyPostsURI":    MyPostsURI,
 			"LikedPostsURI": LikedPostsURI,
+			"PostURI":       PostURI,
 		}
 		json.NewEncoder(w).Encode(config)
 	})

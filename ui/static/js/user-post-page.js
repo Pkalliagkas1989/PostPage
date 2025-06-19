@@ -28,11 +28,6 @@ import { ForumRenderer } from "./user-forum-renderer.js";
     const forumRenderer = new ForumRenderer(postRenderer, dataManager);
 
     const API_CONFIG = configManager.getConfig();
-    const res = await fetch(API_CONFIG.DataURI);
-    if (!res.ok) throw new Error("Failed to fetch post data");
-    const guestData = await res.json();
-    dataManager.setData(guestData);
-
     const params = new URLSearchParams(window.location.search);
     const postId = params.get("id");
     if (!postId) {
@@ -40,6 +35,30 @@ import { ForumRenderer } from "./user-forum-renderer.js";
       return;
     }
 
+    const res = await fetch(API_CONFIG.PostURI + postId);
+    if (!res.ok) throw new Error("Failed to fetch post data");
+    const post = await res.json();
+
+    const data = {
+      categories: post.categories.map((c) => ({
+        id: c.id,
+        name: c.name,
+        posts: [
+          {
+            id: post.id,
+            user_id: post.user_id,
+            username: post.username,
+            title: post.title,
+            content: post.content,
+            created_at: post.created_at,
+            comments: post.comments,
+            reactions: post.reactions,
+          },
+        ],
+      })),
+    };
+
+    dataManager.setData(data);
     forumRenderer.renderSinglePost(postId);
   } catch (err) {
     console.error("Error loading post:", err);

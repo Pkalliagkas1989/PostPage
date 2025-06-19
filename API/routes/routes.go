@@ -22,7 +22,7 @@ func SetupRoutes(db *sql.DB) http.Handler {
 	// Create handlers
 	authHandler := handlers.NewAuthHandler(userRepo, sessionRepo)
 	categoryHandler := handlers.NewCategoryHandler(categoryRepo)
-	postHandler := handlers.NewPostHandler(postRepo)
+	postHandler := handlers.NewPostHandler(postRepo, commentRepo, reactionRepo)
 	myPostsHandler := handlers.NewMyPostsHandler(postRepo, commentRepo, reactionRepo)
 	likedPostsHandler := handlers.NewLikedPostsHandler(postRepo, commentRepo, reactionRepo)
 	commentHandler := handlers.NewCommentHandler(commentRepo)
@@ -41,6 +41,7 @@ func SetupRoutes(db *sql.DB) http.Handler {
 	// Public routes
 	mux.Handle("/forum/api/categories", corsMiddleware.Handler(http.HandlerFunc(categoryHandler.GetCategories)))
 	mux.Handle("/forum/api/allData", corsMiddleware.Handler(http.HandlerFunc(guestHandler.GetGuestData)))
+	mux.Handle("/forum/api/posts/", corsMiddleware.Handler(http.HandlerFunc(postHandler.GetPost)))
 	mux.Handle("/forum/api/register", corsMiddleware.Handler(http.HandlerFunc(registerLimiter.Limit(authHandler.Register))))
 	mux.Handle("/forum/api/session/login", corsMiddleware.Handler(http.HandlerFunc(authHandler.Login)))
 	mux.Handle("/forum/api/session/logout", corsMiddleware.Handler(http.HandlerFunc(authHandler.Logout)))
