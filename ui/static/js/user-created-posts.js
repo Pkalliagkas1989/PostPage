@@ -34,6 +34,7 @@ function fetchAndRenderCreatedPosts(configManager, postRenderer) {
           postTemplate,
           container,
           categoryName,
+          false,
           () => fetchAndRenderCreatedPosts(configManager, postRenderer) // REFRESH callback
         );
       });
