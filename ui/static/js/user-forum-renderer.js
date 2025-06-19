@@ -82,6 +82,37 @@ class ForumRenderer {
 
     this.forumContainer.appendChild(categoryElement);
   }
+
+  renderSinglePost(postId) {
+    this.forumContainer.innerHTML = "";
+    const data = this.dataManager.getData();
+    if (!data || !data.categories) return;
+
+    let foundPost = null;
+    let categoryNames = [];
+    data.categories.forEach((category) => {
+      (category.posts || []).forEach((post) => {
+        if (post.id === postId || post.id === +postId) {
+          foundPost = post;
+          categoryNames.push(category.name);
+        }
+      });
+    });
+
+    if (!foundPost) return;
+
+    const postTemplate = document.getElementById("post-template");
+    const commentTemplate = document.getElementById("comment-template");
+
+    this.postRenderer.renderPost(
+      foundPost,
+      commentTemplate,
+      postTemplate,
+      this.forumContainer,
+      categoryNames.join(", "),
+      () => this.renderSinglePost(postId)
+    );
+  }
 }
 
 export { ForumRenderer };
