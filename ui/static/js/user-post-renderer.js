@@ -12,7 +12,11 @@ class PostRenderer {
     postElement.querySelector(
       ".post-header"
     ).textContent = `${post.username} posted in ${categoryName}`;
-    postElement.querySelector(".post-title").textContent = post.title;
+    const titleEl = postElement.querySelector(".post-title");
+    titleEl.textContent = post.title;
+    titleEl.addEventListener("click", () => {
+      window.location.href = `/post?id=${post.id}`;
+    });
     postElement.querySelector(".post-content").textContent = post.content;
     postElement.querySelector(".post-time").textContent = new Date(
       post.created_at
