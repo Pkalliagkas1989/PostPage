@@ -43,6 +43,7 @@ class ForumRenderer {
         postTemplate,
         this.forumContainer,
         post.categoryNames.join(", "),
+        false,
         () => this.renderAllPosts()
       );
     });
@@ -76,6 +77,7 @@ class ForumRenderer {
         postTemplate,
         postsContainer,
         category.name,
+        false,
         () => this.renderPostsForCategory(categoryId)
       );
     });
@@ -110,6 +112,7 @@ class ForumRenderer {
       postTemplate,
       this.forumContainer,
       categoryNames.join(", "),
+      true,
       () => this.renderSinglePost(postId)
     );
   }

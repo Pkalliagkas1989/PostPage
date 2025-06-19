@@ -34,6 +34,7 @@ function fetchAndRenderLikedPosts(configManager, postRenderer) {
           postTemplate,
           container,
           categoryName,
+          false,
           () => fetchAndRenderLikedPosts(configManager, postRenderer) // refresh callback
         );
       });
