@@ -2,7 +2,6 @@ document.addEventListener('DOMContentLoaded', async () => {
   const container = document.getElementById('forumContainer');
   const catTpl = document.getElementById('category-template');
   const postTpl = document.getElementById('post-template');
-  const commentTpl = document.getElementById('comment-template');
   const tabs = document.getElementById('category-tabs');
   const feedLink = document.getElementById('my-feed-link');
   let allData;
@@ -79,18 +78,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     const dislikes = (post.reactions || []).filter((r) => r.reaction_type === 2).length;
     postEl.querySelector('.like-count').textContent = likes;
     postEl.querySelector('.dislike-count').textContent = dislikes;
-    const commentsCont = postEl.querySelector('.post-comments');
-    for (const comment of post.comments || []) {
-      const cEl = commentTpl.content.cloneNode(true);
-      cEl.querySelector('.comment-user').textContent = comment.username;
-      cEl.querySelector('.comment-content').textContent = comment.content;
-      cEl.querySelector('.comment-time').textContent = new Date(comment.created_at).toLocaleString();
-      const clikes = (comment.reactions || []).filter((r) => r.reaction_type === 1).length;
-      const cdislikes = (comment.reactions || []).filter((r) => r.reaction_type === 2).length;
-      cEl.querySelector('.like-count').textContent = clikes;
-      cEl.querySelector('.dislike-count').textContent = cdislikes;
-      commentsCont.appendChild(cEl);
-    }
     return postEl;
   }
 });
