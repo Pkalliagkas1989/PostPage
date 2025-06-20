@@ -13,7 +13,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   feedLink.addEventListener('click', (e) => {
     e.preventDefault();
-    renderFeed();
+    window.location.href = '/guest';
   });
 
   const data = await fetchJSON('http://localhost:8080/forum/api/allData');
