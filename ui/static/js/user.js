@@ -3,6 +3,9 @@ document.addEventListener('DOMContentLoaded', async () => {
   const catTpl = document.getElementById('category-template');
   const postTpl = document.getElementById('post-template');
   const csrfToken = sessionStorage.getItem('csrf_token');
+  let allData;
+  const params = new URLSearchParams(window.location.search);
+  const initialCat = parseInt(params.get('cat'), 10);
   async function verify() {
     const res = await fetch('http://localhost:8080/forum/api/session/verify', {credentials:'include'});
     return res.ok;
@@ -26,18 +29,36 @@ document.addEventListener('DOMContentLoaded', async () => {
   async function loadData() {
     const res = await fetch('http://localhost:8080/forum/api/allData', {credentials:'include'});
     if (!res.ok) throw new Error('load error');
-    const data = await res.json();
-    renderData(data);
+    allData = await res.json();
+    renderData(allData);
   }
+
   function renderData(data) {
     container.innerHTML = '';
-    for (const cat of data.categories) {
-      const catEl = catTpl.content.cloneNode(true);
-      catEl.querySelector('.category-title').textContent = cat.name;
-      const postsCont = catEl.querySelector('.category-posts');
-      for (const post of cat.posts) {
+    data.categories.forEach(renderCategorySection);
+  }
+
+  function renderCategorySection(cat) {
+    const catEl = catTpl.content.cloneNode(true);
+    catEl.querySelector('.category-title').textContent = cat.name;
+    const postsCont = catEl.querySelector('.category-posts');
+    for (const post of cat.posts) {
         const postEl = postTpl.content.cloneNode(true);
         postEl.querySelector('.post-header').textContent = `${post.username} posted`;
+        const catContainer = postEl.querySelector('.post-categories');
+        if (catContainer && post.categories) {
+          post.categories.forEach(c => {
+            const link = document.createElement('a');
+            link.href = '#';
+            link.textContent = `#${c.name}`;
+            link.dataset.catId = c.id;
+            link.addEventListener('click', (e) => {
+              e.preventDefault();
+              renderCategory(c.id);
+            });
+            catContainer.appendChild(link);
+          });
+        }
         const titleLink = postEl.querySelector('.post-title');
         titleLink.textContent = post.title;
         titleLink.addEventListener('click', (e) => {
@@ -64,7 +85,15 @@ document.addEventListener('DOMContentLoaded', async () => {
         });
         postsCont.appendChild(postEl);
       }
-      container.appendChild(catEl);
+    container.appendChild(catEl);
+  }
+
+  function renderCategory(id) {
+    if (!allData) return;
+    const cat = allData.categories.find(c => c.id === id);
+    if (cat) {
+      container.innerHTML = '';
+      renderCategorySection(cat);
     }
   }
   async function react(id, type, rtype) {
@@ -141,5 +170,9 @@ document.addEventListener('DOMContentLoaded', async () => {
     await loadData();
   }
   loadCategories();
-  loadData();
+  loadData().then(() => {
+    if (initialCat) {
+      renderCategory(initialCat);
+    }
+  });
 });

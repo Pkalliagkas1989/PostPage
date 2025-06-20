@@ -233,6 +233,21 @@
     margin: 0 0 0.5em;
     font-size: 1.2em;
   }
+
+  .post-categories {
+    margin-bottom: 0.5em;
+  }
+
+  .post-categories a {
+    color: var(--color-tertiary);
+    margin-right: 0.5em;
+    text-decoration: none;
+    font-size: 0.9em;
+  }
+
+  .post-categories a:hover {
+    text-decoration: underline;
+  }
   
   .post p {
     color: var(--text-secondary);
