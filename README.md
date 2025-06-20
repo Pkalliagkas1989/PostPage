@@ -40,3 +40,21 @@ message using the `message` query parameter:
 ```bash
 curl "http://localhost:8080/forum/api/error?code=400&message=bad+data"
 ```
+
+## JavaScript Helper
+
+The UI scripts share a `fetchJSON` helper located at
+`ui/static/js/api.js`. Import this function instead of calling
+`fetch` directly:
+
+```javascript
+import { fetchJSON } from './api.js';
+
+const data = await fetchJSON('http://localhost:8080/forum/api/allData', {
+  credentials: 'include'
+});
+```
+
+On success it returns the parsed JSON. When the response is not OK the
+function attempts to parse an error object with `code` and `message`
+and redirects the user to `/error?code=CODE&message=MESSAGE`.

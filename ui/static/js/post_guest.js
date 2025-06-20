@@ -1,3 +1,5 @@
+import { fetchJSON } from './api.js';
+
 document.addEventListener('DOMContentLoaded', async () => {
   const container = document.getElementById('forumContainer');
   const postTpl = document.getElementById('post-template');
@@ -10,14 +12,12 @@ document.addEventListener('DOMContentLoaded', async () => {
     return;
   }
 
-  try {
-    const res = await fetch(`http://localhost:8080/forum/api/posts/${id}`);
-    if (!res.ok) throw new Error('load error');
-    const data = await res.json();
-    renderPost(data);
-  } catch (err) {
+  const data = await fetchJSON(`http://localhost:8080/forum/api/posts/${id}`);
+  if (!data) {
     container.textContent = 'Error loading post';
+    return;
   }
+  renderPost(data);
 
   function renderPost(post) {
     container.innerHTML = '';
