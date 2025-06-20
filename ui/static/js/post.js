@@ -50,6 +50,20 @@ document.addEventListener('DOMContentLoaded', async () => {
     container.innerHTML = '';
     const postEl = postTpl.content.cloneNode(true);
     postEl.querySelector('.post-header').textContent = `${post.username} posted`;
+    const catContainer = postEl.querySelector('.post-categories');
+    if (catContainer && post.categories) {
+      post.categories.forEach(c => {
+        const link = document.createElement('a');
+        link.href = '#';
+        link.textContent = `#${c.name}`;
+        link.dataset.catId = c.id;
+        link.addEventListener('click', (e) => {
+          e.preventDefault();
+          window.location.href = `/user?cat=${c.id}`;
+        });
+        catContainer.appendChild(link);
+      });
+    }
     postEl.querySelector('.post-title').textContent = post.title;
     postEl.querySelector('.post-content').textContent = post.content;
     postEl.querySelector('.post-time').textContent = new Date(post.created_at).toLocaleString();

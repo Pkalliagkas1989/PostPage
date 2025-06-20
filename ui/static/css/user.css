@@ -355,6 +355,21 @@ body {
     font-weight: 600;
 }
 
+.post-categories {
+    margin-bottom: 0.5em;
+}
+
+.post-categories a {
+    color: var(--color-tertiary);
+    margin-right: 0.5em;
+    text-decoration: none;
+    font-size: 0.9em;
+}
+
+.post-categories a:hover {
+    text-decoration: underline;
+}
+
 .post p {
     color: var(--text-secondary);
     margin: 0.4em 0;

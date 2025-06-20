@@ -5,6 +5,8 @@ document.addEventListener('DOMContentLoaded', async () => {
   const tabs = document.getElementById('category-tabs');
   const feedLink = document.getElementById('my-feed-link');
   let allData;
+  const params = new URLSearchParams(window.location.search);
+  const initialCat = parseInt(params.get('cat'), 10);
 
   feedLink.addEventListener('click', (e) => {
     e.preventDefault();
@@ -16,7 +18,11 @@ document.addEventListener('DOMContentLoaded', async () => {
     if (!res.ok) throw new Error('failed to load');
     allData = await res.json();
     populateCategories();
-    renderFeed();
+    if (initialCat) {
+      renderCategory(initialCat);
+    } else {
+      renderFeed();
+    }
   } catch (err) {
     container.textContent = 'Error loading posts';
   }
@@ -66,6 +72,20 @@ document.addEventListener('DOMContentLoaded', async () => {
   function createPostElement(post) {
     const postEl = postTpl.content.cloneNode(true);
     postEl.querySelector('.post-header').textContent = `${post.username} posted`;
+    const catContainer = postEl.querySelector('.post-categories');
+    if (catContainer && post.categories) {
+      post.categories.forEach(c => {
+        const link = document.createElement('a');
+        link.href = '#';
+        link.textContent = `#${c.name}`;
+        link.dataset.catId = c.id;
+        link.addEventListener('click', (e) => {
+          e.preventDefault();
+          renderCategory(c.id);
+        });
+        catContainer.appendChild(link);
+      });
+    }
     const titleEl = postEl.querySelector('.post-title');
     titleEl.textContent = post.title;
     titleEl.addEventListener('click', (e) => {

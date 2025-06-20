@@ -31,16 +31,15 @@ type CommentResponse struct {
 }
 
 type PostResponse struct {
-	ID           string             `json:"id"`
-	UserID       string             `json:"user_id"`
-	Username     string             `json:"username"`
-	CategoryID   int                `json:"category_id"`
-	CategoryName string             `json:"category_name"` // NEW FIELD
-	Title        string             `json:"title"`         // Optional title field
-	Content      string             `json:"content"`
-	CreatedAt    time.Time          `json:"created_at"`
-	Comments     []CommentResponse  `json:"comments,omitempty"`
-	Reactions    []ReactionResponse `json:"reactions,omitempty"`
+	ID         string             `json:"id"`
+	UserID     string             `json:"user_id"`
+	Username   string             `json:"username"`
+	Categories []CategoryInfo     `json:"categories"`
+	Title      string             `json:"title"`
+	Content    string             `json:"content"`
+	CreatedAt  time.Time          `json:"created_at"`
+	Comments   []CommentResponse  `json:"comments,omitempty"`
+	Reactions  []ReactionResponse `json:"reactions,omitempty"`
 }
 
 type CategoryResponse struct {
@@ -123,24 +122,32 @@ func (h *GuestHandler) GetGuestData(w http.ResponseWriter, r *http.Request) {
 		}
 
 		posts, err := h.postRepo.GetPostsByCategoryWithUser(cat.ID)
-
 		if err != nil {
 			utils.ErrorResponse(w, "Failed to load posts", http.StatusInternalServerError)
 			return
 		}
 
 		for _, post := range posts {
+			categories, err := h.postRepo.GetCategoriesByPostID(post.ID)
+			if err != nil {
+				utils.ErrorResponse(w, "Failed to load categories", http.StatusInternalServerError)
+				return
+			}
+			var catInfo []CategoryInfo
+			for _, c := range categories {
+				catInfo = append(catInfo, CategoryInfo{ID: c.ID, Name: c.Name})
+			}
+
 			postResp := PostResponse{
-				ID:           post.ID,
-				UserID:       post.UserID,
-				Username:     post.Username,
-				CategoryID:   post.CategoryID,
-				CategoryName: cat.Name,   // ✅ inject category name
-				Title:        post.Title, // Optional title field
-				Content:      post.Content,
-				CreatedAt:    post.CreatedAt,
-				Comments:     []CommentResponse{},  // ✅ avoid null
-				Reactions:    []ReactionResponse{}, // ✅ avoid null
+				ID:         post.ID,
+				UserID:     post.UserID,
+				Username:   post.Username,
+				Categories: catInfo,
+				Title:      post.Title,
+				Content:    post.Content,
+				CreatedAt:  post.CreatedAt,
+				Comments:   []CommentResponse{},
+				Reactions:  []ReactionResponse{},
 			}
 
 			comments, err := h.commentRepo.GetCommentsByPostWithUser(post.ID)
