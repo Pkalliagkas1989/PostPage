@@ -1,23 +1,14 @@
 import { fetchJSON } from './api.js';
 
-async function checkSession() {
-  try {
-    const res = await fetch('http://localhost:8080/forum/api/session/verify', {
-      credentials: 'include'
-    });
-    if (res.ok) {
-      const data = await res.json();
-      if (data.csrf_token) {
-        sessionStorage.setItem('csrf_token', data.csrf_token);
-      }
-      window.location.href = '/user';
-    }
-  } catch (_) {
-    // ignore network errors and stay on the page
-  }
-}
-
-document.addEventListener('DOMContentLoaded', checkSession);
+// Automatically terminate any existing session when the login page loads
+// so navigating back to this page will log the user out.
+document.addEventListener('DOMContentLoaded', async () => {
+  await fetchJSON('http://localhost:8080/forum/api/session/logout', {
+    method: 'POST',
+    credentials: 'include'
+  });
+  sessionStorage.removeItem('csrf_token');
+});
 
 document.getElementById('loginForm').addEventListener('submit', async (e) => {
   e.preventDefault();
