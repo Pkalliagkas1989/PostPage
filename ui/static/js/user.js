@@ -144,11 +144,13 @@ document.addEventListener('DOMContentLoaded', async () => {
   function renderCategory(id) {
     if (!allData) return;
     const cat = allData.categories.find(c => c.id === id);
-    if (cat) {
-      currentCatId = id;
-      container.innerHTML = '';
-      renderCategorySection(cat);
+    if (!cat) {
+      window.location.href = '/error?code=404&message=Category%20not%20found';
+      return;
     }
+    currentCatId = id;
+    container.innerHTML = '';
+    renderCategorySection(cat);
   }
   async function react(id, type, rtype) {
     await fetchJSON('http://localhost:8080/forum/api/react', {

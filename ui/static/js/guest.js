@@ -70,10 +70,12 @@ document.addEventListener('DOMContentLoaded', async () => {
   function renderCategory(id) {
     container.innerHTML = '';
     const cat = allData.categories.find((c) => c.id === id);
-    if (cat) {
-      currentCatId = id;
-      renderCategorySection(cat);
+    if (!cat) {
+      window.location.href = '/error?code=404&message=Category%20not%20found';
+      return;
     }
+    currentCatId = id;
+    renderCategorySection(cat);
   }
 
   function renderCategorySection(cat) {
