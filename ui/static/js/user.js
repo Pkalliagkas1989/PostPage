@@ -69,7 +69,24 @@ document.addEventListener('DOMContentLoaded', async () => {
   function renderFeed() {
     currentCatId = null;
     container.innerHTML = '';
-    allData.categories.forEach(cat => renderCategorySection(cat, null));
+    const postsMap = new Map();
+    allData.categories.forEach(cat => {
+      cat.posts.forEach(post => {
+        if (!postsMap.has(post.id)) {
+          postsMap.set(post.id, post);
+        }
+      });
+    });
+    const posts = Array.from(postsMap.values()).sort((a, b) =>
+      new Date(b.created_at) - new Date(a.created_at)
+    );
+    const catEl = catTpl.content.cloneNode(true);
+    catEl.querySelector('.category-title').textContent = 'Feed';
+    const postsCont = catEl.querySelector('.category-posts');
+    posts.forEach(post => {
+      postsCont.appendChild(createPostElement(post, null));
+    });
+    container.appendChild(catEl);
   }
 
   function renderCategorySection(cat, hideCatId) {
@@ -77,50 +94,54 @@ document.addEventListener('DOMContentLoaded', async () => {
     catEl.querySelector('.category-title').textContent = cat.name;
     const postsCont = catEl.querySelector('.category-posts');
     for (const post of cat.posts) {
-        const postEl = postTpl.content.cloneNode(true);
-        postEl.querySelector('.post-header').textContent = `${post.username} posted`;
-        const catContainer = postEl.querySelector('.post-categories');
-        if (catContainer && post.categories) {
-          post.categories.forEach(c => {
-            if (hideCatId && c.id === hideCatId) return;
-            const link = document.createElement('a');
-            link.href = '#';
-            link.textContent = `#${c.name}`;
-            link.dataset.catId = c.id;
-            link.addEventListener('click', (e) => {
-              e.preventDefault();
-              renderCategory(c.id);
-            });
-            catContainer.appendChild(link);
-          });
-        }
-        const titleLink = postEl.querySelector('.post-title');
-        titleLink.textContent = post.title;
-        titleLink.addEventListener('click', (e) => {
-          e.preventDefault();
-          window.location.href = `/post?id=${post.id}`;
-        });
-        postEl.querySelector('.post-content').textContent = post.content;
-        postEl.querySelector('.post-time').textContent = new Date(post.created_at).toLocaleString();
-        const likeBtn = postEl.querySelector('.like-btn');
-        const dislikeBtn = postEl.querySelector('.dislike-btn');
-        const likes = (post.reactions || []).filter(r => r.reaction_type === 1).length;
-        const dislikes = (post.reactions || []).filter(r => r.reaction_type === 2).length;
-        likeBtn.querySelector('.like-count').textContent = likes;
-        dislikeBtn.querySelector('.dislike-count').textContent = dislikes;
-        likeBtn.addEventListener('click', () => react(post.id, 'post', 1));
-        dislikeBtn.addEventListener('click', () => react(post.id, 'post', 2));
-        const commentBtn = postEl.querySelector('.comment-btn');
-        commentBtn.addEventListener('click', async () => {
-          const text = prompt('Comment:');
-          if (text) {
-            await createComment(post.id, text);
-            await loadData();
-          }
-        });
-        postsCont.appendChild(postEl);
-      }
+      postsCont.appendChild(createPostElement(post, hideCatId));
+    }
     container.appendChild(catEl);
+  }
+
+  function createPostElement(post, hideCatId) {
+    const postEl = postTpl.content.cloneNode(true);
+    postEl.querySelector('.post-header').textContent = `${post.username} posted`;
+    const catContainer = postEl.querySelector('.post-categories');
+    if (catContainer && post.categories) {
+      post.categories.forEach(c => {
+        if (hideCatId && c.id === hideCatId) return;
+        const link = document.createElement('a');
+        link.href = '#';
+        link.textContent = `#${c.name}`;
+        link.dataset.catId = c.id;
+        link.addEventListener('click', (e) => {
+          e.preventDefault();
+          renderCategory(c.id);
+        });
+        catContainer.appendChild(link);
+      });
+    }
+    const titleLink = postEl.querySelector('.post-title');
+    titleLink.textContent = post.title;
+    titleLink.addEventListener('click', (e) => {
+      e.preventDefault();
+      window.location.href = `/post?id=${post.id}`;
+    });
+    postEl.querySelector('.post-content').textContent = post.content;
+    postEl.querySelector('.post-time').textContent = new Date(post.created_at).toLocaleString();
+    const likeBtn = postEl.querySelector('.like-btn');
+    const dislikeBtn = postEl.querySelector('.dislike-btn');
+    const likes = (post.reactions || []).filter(r => r.reaction_type === 1).length;
+    const dislikes = (post.reactions || []).filter(r => r.reaction_type === 2).length;
+    likeBtn.querySelector('.like-count').textContent = likes;
+    dislikeBtn.querySelector('.dislike-count').textContent = dislikes;
+    likeBtn.addEventListener('click', () => react(post.id, 'post', 1));
+    dislikeBtn.addEventListener('click', () => react(post.id, 'post', 2));
+    const commentBtn = postEl.querySelector('.comment-btn');
+    commentBtn.addEventListener('click', async () => {
+      const text = prompt('Comment:');
+      if (text) {
+        await createComment(post.id, text);
+        await loadData();
+      }
+    });
+    return postEl;
   }
 
   function renderCategory(id) {

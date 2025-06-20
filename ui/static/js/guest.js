@@ -49,7 +49,24 @@ document.addEventListener('DOMContentLoaded', async () => {
   function renderFeed() {
     currentCatId = null;
     container.innerHTML = '';
-    allData.categories.forEach(cat => renderCategorySection(cat, null));
+    const postsMap = new Map();
+    allData.categories.forEach(cat => {
+      cat.posts.forEach(post => {
+        if (!postsMap.has(post.id)) {
+          postsMap.set(post.id, post);
+        }
+      });
+    });
+    const posts = Array.from(postsMap.values()).sort((a, b) =>
+      new Date(b.created_at) - new Date(a.created_at)
+    );
+    const catEl = catTpl.content.cloneNode(true);
+    catEl.querySelector('.category-title').textContent = 'Feed';
+    const postsCont = catEl.querySelector('.category-posts');
+    posts.forEach(post => {
+      postsCont.appendChild(createPostElement(post, null));
+    });
+    container.appendChild(catEl);
   }
 
   function renderCategory(id) {
