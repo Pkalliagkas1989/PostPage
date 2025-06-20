@@ -1,4 +1,5 @@
 // Post page for authenticated users
+import { fetchJSON } from './api.js';
 
 document.addEventListener('DOMContentLoaded', async () => {
   const container = document.getElementById('forumContainer');
@@ -7,8 +8,8 @@ document.addEventListener('DOMContentLoaded', async () => {
   const csrfToken = sessionStorage.getItem('csrf_token');
 
   async function verify() {
-    const res = await fetch('http://localhost:8080/forum/api/session/verify', { credentials: 'include' });
-    return res.ok;
+    const data = await fetchJSON('http://localhost:8080/forum/api/session/verify', { credentials: 'include' });
+    return !!data;
   }
 
   if (!(await verify())) {
@@ -20,7 +21,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   if (logoutLink) {
     logoutLink.addEventListener('click', async (e) => {
       e.preventDefault();
-      await fetch('http://localhost:8080/forum/api/session/logout', {
+      await fetchJSON('http://localhost:8080/forum/api/session/logout', {
         method: 'POST',
         credentials: 'include',
         headers: { 'X-CSRF-Token': csrfToken }
@@ -37,12 +38,11 @@ document.addEventListener('DOMContentLoaded', async () => {
   }
 
   async function loadPost() {
-    const res = await fetch(`http://localhost:8080/forum/api/posts/${id}`, { credentials: 'include' });
-    if (!res.ok) {
+    const data = await fetchJSON(`http://localhost:8080/forum/api/posts/${id}`, { credentials: 'include' });
+    if (!data) {
       container.textContent = 'Error loading post';
       return;
     }
-    const data = await res.json();
     renderPost(data);
   }
 
@@ -103,7 +103,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   }
 
   async function react(targetId, type, rtype) {
-    await fetch('http://localhost:8080/forum/api/react', {
+    await fetchJSON('http://localhost:8080/forum/api/react', {
       method: 'POST',
       credentials: 'include',
       headers: {
@@ -116,7 +116,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   }
 
   async function createComment(postId, content) {
-    await fetch('http://localhost:8080/forum/api/comments', {
+    await fetchJSON('http://localhost:8080/forum/api/comments', {
       method: 'POST',
       credentials: 'include',
       headers: {

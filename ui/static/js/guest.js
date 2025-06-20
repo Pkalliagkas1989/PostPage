@@ -1,3 +1,5 @@
+import { fetchJSON } from './api.js';
+
 document.addEventListener('DOMContentLoaded', async () => {
   const container = document.getElementById('forumContainer');
   const catTpl = document.getElementById('category-template');
@@ -14,18 +16,14 @@ document.addEventListener('DOMContentLoaded', async () => {
     renderFeed();
   });
 
-  try {
-    const res = await fetch('http://localhost:8080/forum/api/allData');
-    if (!res.ok) throw new Error('failed to load');
-    allData = await res.json();
-    populateCategories();
-    if (initialCat) {
-      renderCategory(initialCat);
-    } else {
-      renderFeed();
-    }
-  } catch (err) {
-    container.textContent = 'Error loading posts';
+  const data = await fetchJSON('http://localhost:8080/forum/api/allData');
+  if (!data) return;
+  allData = data;
+  populateCategories();
+  if (initialCat) {
+    renderCategory(initialCat);
+  } else {
+    renderFeed();
   }
 
   function populateCategories() {

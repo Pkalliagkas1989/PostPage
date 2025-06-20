@@ -1,3 +1,5 @@
+import { fetchJSON } from './api.js';
+
 document.addEventListener('DOMContentLoaded', async () => {
   const container = document.getElementById('forumContainer');
   const catTpl = document.getElementById('category-template');
@@ -10,8 +12,8 @@ document.addEventListener('DOMContentLoaded', async () => {
   const initialCat = parseInt(params.get('cat'), 10);
   let currentCatId = initialCat || null;
   async function verify() {
-    const res = await fetch('http://localhost:8080/forum/api/session/verify', {credentials:'include'});
-    return res.ok;
+    const data = await fetchJSON('http://localhost:8080/forum/api/session/verify', { credentials: 'include' });
+    return !!data;
   }
   if (!(await verify())) {
     window.location.href = '/login';
@@ -21,7 +23,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   if (logoutLink) {
     logoutLink.addEventListener('click', async (e) => {
       e.preventDefault();
-      await fetch('http://localhost:8080/forum/api/session/logout', {
+      await fetchJSON('http://localhost:8080/forum/api/session/logout', {
         method: 'POST',
         credentials: 'include',
         headers: { 'X-CSRF-Token': csrfToken }
@@ -37,9 +39,9 @@ document.addEventListener('DOMContentLoaded', async () => {
   }
 
   async function loadData() {
-    const res = await fetch('http://localhost:8080/forum/api/allData', {credentials:'include'});
-    if (!res.ok) throw new Error('load error');
-    allData = await res.json();
+    const data = await fetchJSON('http://localhost:8080/forum/api/allData', { credentials: 'include' });
+    if (!data) return;
+    allData = data;
     populateCategories();
     if (currentCatId) {
       renderCategory(currentCatId);
@@ -154,7 +156,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
   }
   async function react(id, type, rtype) {
-    await fetch('http://localhost:8080/forum/api/react', {
+    await fetchJSON('http://localhost:8080/forum/api/react', {
       method: 'POST',
       credentials: 'include',
       headers: {
@@ -166,7 +168,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     loadData();
   }
   async function createComment(postId, content) {
-    await fetch('http://localhost:8080/forum/api/comments', {
+    await fetchJSON('http://localhost:8080/forum/api/comments', {
       method: 'POST',
       credentials: 'include',
       headers: {
@@ -190,9 +192,8 @@ document.addEventListener('DOMContentLoaded', async () => {
     submitBtn.addEventListener('click', createPost);
   }
   async function loadCategories() {
-    const res = await fetch('http://localhost:8080/forum/api/categories');
-    if (!res.ok) return;
-    const cats = await res.json();
+    const cats = await fetchJSON('http://localhost:8080/forum/api/categories');
+    if (!cats) return;
     const cont = document.getElementById('post-category');
     cont.innerHTML = '';
     cats.forEach(c => {
@@ -214,7 +215,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     const catChecks = document.querySelectorAll('#post-category input:checked');
     const ids = Array.from(catChecks).map(c => parseInt(c.value,10));
     if (!title || !content || ids.length === 0) return;
-    await fetch('http://localhost:8080/forum/api/posts/create', {
+    await fetchJSON('http://localhost:8080/forum/api/posts/create', {
       method: 'POST',
       credentials: 'include',
       headers: {
