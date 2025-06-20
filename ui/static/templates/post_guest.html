@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>View Post</title>
+    <link rel="stylesheet" href="/static/css/guest.css" />
+  </head>
+  <body>
+    <nav class="navbar">
+      <a class="navbar-brand" href="/guest">Forum</a>
+    </nav>
+
+    <div class="forum-content" id="forumContainer"></div>
+
+    <template id="post-template">
+      <div class="post">
+        <h3 class="post-header"></h3>
+        <div class="post-title"></div>
+        <p class="post-content"></p>
+        <time class="post-time"></time>
+        <div class="post-reactions">
+          <button class="like-btn" disabled>▲ <span class="like-count">0</span></button>
+          <button class="dislike-btn" disabled>▼ <span class="dislike-count">0</span></button>
+        </div>
+        <div class="post-comments"></div>
+      </div>
+    </template>
+
+    <template id="comment-template">
+      <div class="comment">
+        <strong class="comment-user"></strong>
+        <span class="comment-content"></span>
+        <time class="comment-time"></time>
+        <div class="comment-reactions">
+          <button class="like-btn" disabled>▲ <span class="like-count">0</span></button>
+          <button class="dislike-btn" disabled>▼ <span class="dislike-count">0</span></button>
+        </div>
+      </div>
+    </template>
+    <script type="module" src="/static/js/post_guest.js"></script>
+  </body>
+</html>

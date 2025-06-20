@@ -48,6 +48,9 @@ func main() {
 	mux.HandleFunc("/post", func(w http.ResponseWriter, r *http.Request) {
 		http.ServeFile(w, r, "./static/templates/post.html")
 	})
+	mux.HandleFunc("/post-guest", func(w http.ResponseWriter, r *http.Request) {
+		http.ServeFile(w, r, "./static/templates/post_guest.html")
+	})
 
 	mux.HandleFunc("/error", func(w http.ResponseWriter, r *http.Request) {
 		codeStr := r.URL.Query().Get("code")
