@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>View Post</title>
     <link rel="stylesheet" href="/static/css/user.css" />
+    <link rel="stylesheet" href="/static/css/modal.css" />
   </head>
   <body>
     <nav class="navbar">
@@ -43,6 +44,15 @@
         </div>
       </div>
     </template>
+
+    <div id="comment-modal" class="modal hidden">
+      <div class="modal-content">
+        <button class="close-btn">&times;</button>
+        <h2>Add Comment</h2>
+        <textarea id="comment-body" class="comment-input" placeholder="Write your comment..."></textarea>
+        <button id="submit-comment">Submit</button>
+      </div>
+    </div>
     <script type="module" src="/static/js/post.js"></script>
   </body>
 </html>

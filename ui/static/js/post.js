@@ -5,6 +5,11 @@ document.addEventListener('DOMContentLoaded', async () => {
   const container = document.getElementById('forumContainer');
   const postTpl = document.getElementById('post-template');
   const commentTpl = document.getElementById('comment-template');
+  const commentModal = document.getElementById('comment-modal');
+  const commentClose = commentModal?.querySelector('.close-btn');
+  const submitCommentBtn = document.getElementById('submit-comment');
+  const commentBody = document.getElementById('comment-body');
+  let currentPostId = null;
   let csrfToken = sessionStorage.getItem('csrf_token');
 
   async function verify() {
@@ -31,6 +36,27 @@ document.addEventListener('DOMContentLoaded', async () => {
         headers: { 'X-CSRF-Token': csrfToken }
       });
       window.location.href = '/';
+    });
+  }
+
+  if (commentClose) {
+    commentClose.addEventListener('click', () => {
+      commentModal.classList.add('hidden');
+      if (commentBody) commentBody.value = '';
+      currentPostId = null;
+    });
+  }
+
+  if (submitCommentBtn) {
+    submitCommentBtn.addEventListener('click', async () => {
+      const text = commentBody?.value.trim();
+      if (text && currentPostId) {
+        await createComment(currentPostId, text);
+        commentModal.classList.add('hidden');
+        commentBody.value = '';
+        currentPostId = null;
+        await loadPost();
+      }
     });
   }
 
@@ -96,12 +122,9 @@ document.addEventListener('DOMContentLoaded', async () => {
       commentsCont.appendChild(cEl);
     }
     const commentBtn = postEl.querySelector('.comment-btn');
-    commentBtn.addEventListener('click', async () => {
-      const text = prompt('Comment:');
-      if (text) {
-        await createComment(post.id, text);
-        await loadPost();
-      }
+    commentBtn.addEventListener('click', () => {
+      currentPostId = post.id;
+      if (commentModal) commentModal.classList.remove('hidden');
     });
     container.appendChild(postEl);
   }
