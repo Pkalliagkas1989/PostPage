@@ -11,7 +11,6 @@ func renderError(w http.ResponseWriter, r *http.Request, code int, msg string) {
 	q := url.Values{}
 	q.Set("code", strconv.Itoa(code))
 	q.Set("message", msg)
-	r.URL.RawQuery = q.Encode()
 	w.WriteHeader(code)
 	http.ServeFile(w, r, "./static/templates/error.html")
 }
@@ -26,7 +25,10 @@ func main() {
 	// Serve individual HTML pages
 	mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 		if r.URL.Path != "/" {
-			renderError(w, r, http.StatusNotFound, "Page not found")
+			q := url.Values{}
+			q.Set("code", strconv.Itoa(http.StatusNotFound))
+			q.Set("message", "Page not found")
+			http.Redirect(w, r, "/error?"+q.Encode(), http.StatusFound)
 			return
 		}
 		http.ServeFile(w, r, "./static/templates/index.html")
