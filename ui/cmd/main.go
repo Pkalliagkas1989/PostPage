@@ -34,6 +34,9 @@ func main() {
 		http.ServeFile(w, r, "./static/templates/index.html")
 	})
 	mux.HandleFunc("/login", func(w http.ResponseWriter, r *http.Request) {
+		// Prevent caching the login page so hitting the back button
+		// always triggers a fresh logout.
+		w.Header().Set("Cache-Control", "no-store")
 		http.ServeFile(w, r, "./static/templates/login.html")
 	})
 	mux.HandleFunc("/register", func(w http.ResponseWriter, r *http.Request) {
