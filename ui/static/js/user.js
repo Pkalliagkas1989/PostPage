@@ -65,7 +65,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       a.dataset.catId = cat.id;
       a.addEventListener('click', (e) => {
         e.preventDefault();
-        renderCategory(cat.id);
+        window.location.href = `/user?cat=${cat.id}`;
       });
       li.appendChild(a);
       tabs.appendChild(li);
@@ -117,7 +117,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         link.dataset.catId = c.id;
         link.addEventListener('click', (e) => {
           e.preventDefault();
-          renderCategory(c.id);
+          window.location.href = `/user?cat=${c.id}`;
         });
         catContainer.appendChild(link);
       });
