@@ -38,7 +38,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   if (feedLink) {
     feedLink.addEventListener('click', (e) => {
       e.preventDefault();
-      renderFeed();
+      window.location.href = '/user';
     });
   }
 
@@ -222,7 +222,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       body: JSON.stringify({ title, content, category_ids: ids })
     });
     modal.classList.add('hidden');
-    await loadData();
+    window.location.reload();
   }
   loadCategories();
   loadData();
