@@ -48,3 +48,25 @@ func (r *CommentRepository) Create(comment models.Comment) (*models.Comment, err
 	}
 	return &comment, nil
 }
+
+func (r *CommentRepository) GetCommentsByPostWithUser(postID string) ([]models.CommentWithUser, error) {
+	query := `SELECT c.comment_id, c.post_id, c.user_id, u.username, c.content, c.created_at
+                          FROM comments c JOIN user u ON c.user_id = u.user_id
+                          WHERE c.post_id = ?`
+
+	rows, err := r.db.Query(query, postID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var comments []models.CommentWithUser
+	for rows.Next() {
+		var c models.CommentWithUser
+		if err := rows.Scan(&c.ID, &c.PostID, &c.UserID, &c.Username, &c.Content, &c.CreatedAt); err != nil {
+			return nil, err
+		}
+		comments = append(comments, c)
+	}
+	return comments, nil
+}

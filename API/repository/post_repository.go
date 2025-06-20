@@ -205,3 +205,29 @@ func (r *PostRepository) GetPostByIDWithUser(postID string) (*models.PostWithUse
 	}
 	return &p, nil
 }
+
+func (r *PostRepository) GetPostsByCategoryWithUser(categoryID int) ([]models.PostWithUser, error) {
+	rows, err := r.db.Query(`
+                SELECT p.post_id, p.user_id, u.username, pc.category_id, p.title, p.content, p.created_at
+                FROM posts p
+                JOIN post_categories pc ON p.post_id = pc.post_id
+                JOIN user u ON p.user_id = u.user_id
+                WHERE pc.category_id = ?
+                ORDER BY p.created_at DESC
+        `, categoryID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var posts []models.PostWithUser
+	for rows.Next() {
+		var post models.PostWithUser
+		err := rows.Scan(&post.ID, &post.UserID, &post.Username, &post.CategoryID, &post.Title, &post.Content, &post.CreatedAt)
+		if err != nil {
+			return nil, err
+		}
+		posts = append(posts, post)
+	}
+	return posts, nil
+}
