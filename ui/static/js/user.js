@@ -135,14 +135,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     dislikeBtn.querySelector('.dislike-count').textContent = dislikes;
     likeBtn.addEventListener('click', () => react(post.id, 'post', 1));
     dislikeBtn.addEventListener('click', () => react(post.id, 'post', 2));
-    const commentBtn = postEl.querySelector('.comment-btn');
-    commentBtn.addEventListener('click', async () => {
-      const text = prompt('Comment:');
-      if (text) {
-        await createComment(post.id, text);
-        await loadData();
-      }
-    });
     return postEl;
   }
 
