@@ -62,7 +62,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     catEl.querySelector('.category-title').textContent = 'Feed';
     const postsCont = catEl.querySelector('.category-posts');
     posts.forEach(post => {
-      postsCont.appendChild(createPostElement(post, null));
+      postsCont.appendChild(createPostElement(post));
     });
     container.appendChild(catEl);
   }
@@ -72,28 +72,27 @@ document.addEventListener('DOMContentLoaded', async () => {
     const cat = allData.categories.find((c) => c.id === id);
     if (cat) {
       currentCatId = id;
-      renderCategorySection(cat, id);
+      renderCategorySection(cat);
     }
   }
 
-  function renderCategorySection(cat, hideCatId) {
+  function renderCategorySection(cat) {
     const catEl = catTpl.content.cloneNode(true);
     catEl.querySelector('.category-title').textContent = cat.name;
     const postsCont = catEl.querySelector('.category-posts');
     cat.posts.forEach((post) => {
-      const postEl = createPostElement(post, hideCatId);
+      const postEl = createPostElement(post);
       postsCont.appendChild(postEl);
     });
     container.appendChild(catEl);
   }
 
-  function createPostElement(post, hideCatId) {
+  function createPostElement(post) {
     const postEl = postTpl.content.cloneNode(true);
     postEl.querySelector('.post-header').textContent = `${post.username} posted`;
     const catContainer = postEl.querySelector('.post-categories');
     if (catContainer && post.categories) {
       post.categories.forEach(c => {
-        if (hideCatId && c.id === hideCatId) return;
         const link = document.createElement('a');
         link.href = '#';
         link.textContent = `#${c.name}`;
