@@ -2,7 +2,6 @@ document.addEventListener('DOMContentLoaded', async () => {
   const container = document.getElementById('forumContainer');
   const catTpl = document.getElementById('category-template');
   const postTpl = document.getElementById('post-template');
-  const commentTpl = document.getElementById('comment-template');
   const csrfToken = sessionStorage.getItem('csrf_token');
   async function verify() {
     const res = await fetch('http://localhost:8080/forum/api/session/verify', {credentials:'include'});
@@ -55,14 +54,6 @@ document.addEventListener('DOMContentLoaded', async () => {
         dislikeBtn.querySelector('.dislike-count').textContent = dislikes;
         likeBtn.addEventListener('click', () => react(post.id, 'post', 1));
         dislikeBtn.addEventListener('click', () => react(post.id, 'post', 2));
-        const commentsCont = postEl.querySelector('.post-comments');
-        for (const comment of post.comments || []) {
-          const cEl = commentTpl.content.cloneNode(true);
-          cEl.querySelector('.comment-user').textContent = comment.username;
-          cEl.querySelector('.comment-content').textContent = comment.content;
-          cEl.querySelector('.comment-time').textContent = new Date(comment.created_at).toLocaleString();
-          commentsCont.appendChild(cEl);
-        }
         const commentBtn = postEl.querySelector('.comment-btn');
         commentBtn.addEventListener('click', async () => {
           const text = prompt('Comment:');
