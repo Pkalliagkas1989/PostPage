@@ -12,12 +12,22 @@ document.addEventListener('DOMContentLoaded', async () => {
   const initialCat = parseInt(params.get('cat'), 10);
   let currentCatId = initialCat || null;
   async function verify() {
-    const data = await fetchJSON('http://localhost:8080/forum/api/session/verify', { credentials: 'include' });
-    if (data && data.csrf_token) {
-      sessionStorage.setItem('csrf_token', data.csrf_token);
-      csrfToken = data.csrf_token;
+    try {
+      const res = await fetch('http://localhost:8080/forum/api/session/verify', {
+        credentials: 'include'
+      });
+      if (!res.ok) {
+        return false;
+      }
+      const data = await res.json();
+      if (data && data.csrf_token) {
+        sessionStorage.setItem('csrf_token', data.csrf_token);
+        csrfToken = data.csrf_token;
+      }
+      return true;
+    } catch (_) {
+      return false;
     }
-    return !!data;
   }
   if (!(await verify())) {
     window.location.href = '/login';
