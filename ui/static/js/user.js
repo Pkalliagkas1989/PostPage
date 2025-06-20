@@ -2,10 +2,13 @@ document.addEventListener('DOMContentLoaded', async () => {
   const container = document.getElementById('forumContainer');
   const catTpl = document.getElementById('category-template');
   const postTpl = document.getElementById('post-template');
+  const tabs = document.getElementById('category-tabs');
+  const feedLink = document.getElementById('my-feed-link');
   const csrfToken = sessionStorage.getItem('csrf_token');
   let allData;
   const params = new URLSearchParams(window.location.search);
   const initialCat = parseInt(params.get('cat'), 10);
+  let currentCatId = initialCat || null;
   async function verify() {
     const res = await fetch('http://localhost:8080/forum/api/session/verify', {credentials:'include'});
     return res.ok;
@@ -26,19 +29,50 @@ document.addEventListener('DOMContentLoaded', async () => {
       window.location.href = '/';
     });
   }
+  if (feedLink) {
+    feedLink.addEventListener('click', (e) => {
+      e.preventDefault();
+      renderFeed();
+    });
+  }
+
   async function loadData() {
     const res = await fetch('http://localhost:8080/forum/api/allData', {credentials:'include'});
     if (!res.ok) throw new Error('load error');
     allData = await res.json();
-    renderData(allData);
+    populateCategories();
+    if (currentCatId) {
+      renderCategory(currentCatId);
+    } else {
+      renderFeed();
+    }
   }
 
-  function renderData(data) {
+  function populateCategories() {
+    if (!tabs) return;
+    tabs.innerHTML = '';
+    allData.categories.forEach(cat => {
+      const li = document.createElement('li');
+      const a = document.createElement('a');
+      a.href = '#';
+      a.textContent = cat.name;
+      a.dataset.catId = cat.id;
+      a.addEventListener('click', (e) => {
+        e.preventDefault();
+        renderCategory(cat.id);
+      });
+      li.appendChild(a);
+      tabs.appendChild(li);
+    });
+  }
+
+  function renderFeed() {
+    currentCatId = null;
     container.innerHTML = '';
-    data.categories.forEach(renderCategorySection);
+    allData.categories.forEach(cat => renderCategorySection(cat, null));
   }
 
-  function renderCategorySection(cat) {
+  function renderCategorySection(cat, hideCatId) {
     const catEl = catTpl.content.cloneNode(true);
     catEl.querySelector('.category-title').textContent = cat.name;
     const postsCont = catEl.querySelector('.category-posts');
@@ -48,6 +82,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         const catContainer = postEl.querySelector('.post-categories');
         if (catContainer && post.categories) {
           post.categories.forEach(c => {
+            if (hideCatId && c.id === hideCatId) return;
             const link = document.createElement('a');
             link.href = '#';
             link.textContent = `#${c.name}`;
@@ -92,8 +127,9 @@ document.addEventListener('DOMContentLoaded', async () => {
     if (!allData) return;
     const cat = allData.categories.find(c => c.id === id);
     if (cat) {
+      currentCatId = id;
       container.innerHTML = '';
-      renderCategorySection(cat);
+      renderCategorySection(cat, id);
     }
   }
   async function react(id, type, rtype) {
@@ -170,9 +206,5 @@ document.addEventListener('DOMContentLoaded', async () => {
     await loadData();
   }
   loadCategories();
-  loadData().then(() => {
-    if (initialCat) {
-      renderCategory(initialCat);
-    }
-  });
+  loadData();
 });
