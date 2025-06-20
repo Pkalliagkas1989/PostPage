@@ -1,25 +1,8 @@
 package main
 
 import (
-	"encoding/json"
 	"log"
 	"net/http"
-)
-
-var (
-	APIBaseURL    = "http://localhost:8080/forum/api"
-	AuthURI       = APIBaseURL + "/session/verify"
-	DataURI       = APIBaseURL + "/allData"
-	LoginURI      = APIBaseURL + "/session/login"
-	LogoutURI     = APIBaseURL + "/session/logout"
-	RegisterURI   = APIBaseURL + "/register"
-	CategoriesURI = APIBaseURL + "/categories"
-	ReactionsURI  = APIBaseURL + "/react"
-	CommentsURI   = APIBaseURL + "/comments"
-	CreatePostURI = APIBaseURL + "/posts/create"
-	MyPostsURI    = APIBaseURL + "/user/posts"
-	LikedPostsURI = APIBaseURL + "/user/liked"
-	PostURI       = APIBaseURL + "/posts/"
 )
 
 func main() {
@@ -45,25 +28,6 @@ func main() {
 	})
 	http.HandleFunc("/post", func(w http.ResponseWriter, r *http.Request) {
 		http.ServeFile(w, r, "./static/templates/post.html")
-	})
-	http.HandleFunc("/config", func(w http.ResponseWriter, r *http.Request) {
-		w.Header().Set("Content-Type", "application/json")
-		config := map[string]string{
-			"APIBaseURL":    APIBaseURL,
-			"AuthURI":       AuthURI,
-			"DataURI":       DataURI,
-			"LoginURI":      LoginURI,
-			"LogoutURI":     LogoutURI,
-			"RegisterURI":   RegisterURI,
-			"CategoriesURI": CategoriesURI,
-			"ReactionsURI":  ReactionsURI,
-			"CommentsURI":   CommentsURI,
-			"CreatePostURI": CreatePostURI,
-			"MyPostsURI":    MyPostsURI,
-			"LikedPostsURI": LikedPostsURI,
-			"PostURI":       PostURI,
-		}
-		json.NewEncoder(w).Encode(config)
 	})
 
 	// Start the server

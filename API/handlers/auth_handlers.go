@@ -33,12 +33,22 @@ func (h *AuthHandler) Register(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Parse request body
+	// Parse request body (JSON or form values)
 	var reg models.UserRegistration
-	err := json.NewDecoder(r.Body).Decode(&reg)
-	if err != nil {
-		utils.ErrorResponse(w, "Invalid request body", http.StatusBadRequest)
-		return
+	contentType := r.Header.Get("Content-Type")
+	if strings.HasPrefix(contentType, "application/json") {
+		if err := json.NewDecoder(r.Body).Decode(&reg); err != nil {
+			utils.ErrorResponse(w, "Invalid request body", http.StatusBadRequest)
+			return
+		}
+	} else {
+		if err := r.ParseForm(); err != nil {
+			utils.ErrorResponse(w, "Invalid form data", http.StatusBadRequest)
+			return
+		}
+		reg.Username = r.FormValue("username")
+		reg.Email = r.FormValue("email")
+		reg.Password = r.FormValue("password")
 	}
 
 	reg.Username = strings.TrimSpace(reg.Username)
@@ -109,12 +119,21 @@ func (h *AuthHandler) Login(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Parse request body
+	// Parse request body (JSON or form values)
 	var login models.UserLogin
-	err := json.NewDecoder(r.Body).Decode(&login)
-	if err != nil {
-		http.Error(w, "Invalid request body", http.StatusBadRequest)
-		return
+	contentType := r.Header.Get("Content-Type")
+	if strings.HasPrefix(contentType, "application/json") {
+		if err := json.NewDecoder(r.Body).Decode(&login); err != nil {
+			http.Error(w, "Invalid request body", http.StatusBadRequest)
+			return
+		}
+	} else {
+		if err := r.ParseForm(); err != nil {
+			http.Error(w, "Invalid form data", http.StatusBadRequest)
+			return
+		}
+		login.Email = r.FormValue("email")
+		login.Password = r.FormValue("password")
 	}
 
 	// Validate request
@@ -134,7 +153,7 @@ func (h *AuthHandler) Login(w http.ResponseWriter, r *http.Request) {
 		}
 		return
 	}
-	csrfToken := utils.GenerateCSRFToken()	
+	csrfToken := utils.GenerateCSRFToken()
 
 	// Create a new session
 	log.Println("Creating session for user:", user.ID)
@@ -147,15 +166,14 @@ func (h *AuthHandler) Login(w http.ResponseWriter, r *http.Request) {
 
 	// Set cookie
 	http.SetCookie(w, &http.Cookie{
-    Name:     "session_id",
-    Value:    session.SessionID,
-    Path:     "/",
-    Expires:  session.ExpiresAt,
-    HttpOnly: true,
-    Secure:   false,
-    SameSite: http.SameSiteLaxMode, // Change from None to Lax for localhost
-})
-
+		Name:     "session_id",
+		Value:    session.SessionID,
+		Path:     "/",
+		Expires:  session.ExpiresAt,
+		HttpOnly: true,
+		Secure:   false,
+		SameSite: http.SameSiteLaxMode, // Change from None to Lax for localhost
+	})
 
 	// Return response
 	w.Header().Set("Content-Type", "application/json")
