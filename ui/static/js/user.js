@@ -39,7 +39,12 @@ document.addEventListener('DOMContentLoaded', async () => {
       for (const post of cat.posts) {
         const postEl = postTpl.content.cloneNode(true);
         postEl.querySelector('.post-header').textContent = `${post.username} posted`;
-        postEl.querySelector('.post-title').textContent = post.title;
+        const titleLink = postEl.querySelector('.post-title');
+        titleLink.textContent = post.title;
+        titleLink.addEventListener('click', (e) => {
+          e.preventDefault();
+          window.location.href = `/post?id=${post.id}`;
+        });
         postEl.querySelector('.post-content').textContent = post.content;
         postEl.querySelector('.post-time').textContent = new Date(post.created_at).toLocaleString();
         const likeBtn = postEl.querySelector('.like-btn');
