@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Error</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+    <style>
+        body {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            font-family: 'Open Sans', sans-serif;
+            text-align: center;
+        }
+        .error-container {
+            background: var(--bg-secondary);
+            padding: 2rem 3rem;
+            border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+        }
+        .error-code {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            background-image: var(--gradient-main);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .error-message {
+            margin-bottom: 2rem;
+            color: var(--text-secondary);
+        }
+        .btn {
+            text-decoration: none;
+            padding: 0.8rem 1.5rem;
+            font-size: 1rem;
+            border-radius: 6px;
+            background-image: var(--gradient-main);
+            color: var(--text-primary);
+        }
+    </style>
+</head>
+<body>
+    <div class="error-container">
+        <div class="error-code" id="code"></div>
+        <p class="error-message" id="message"></p>
+        <a href="/" class="btn">Go Home</a>
+    </div>
+    <script>
+        const params = new URLSearchParams(window.location.search);
+        fetch('http://localhost:8080/forum/api/error?' + params.toString())
+            .then(res => res.json())
+            .then(data => {
+                document.getElementById('code').textContent = data.code;
+                document.getElementById('message').textContent = data.message;
+            })
+            .catch(() => {
+                document.getElementById('code').textContent = params.get('code') || 'Error';
+                document.getElementById('message').textContent = params.get('message') || 'Something went wrong';
+            });
+    </script>
+</body>
+</html>

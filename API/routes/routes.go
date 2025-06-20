@@ -28,6 +28,7 @@ func SetupRoutes(db *sql.DB) http.Handler {
 	commentHandler := handlers.NewCommentHandler(commentRepo)
 	reactionHandler := handlers.NewReactionHandler(reactionRepo)
 	guestHandler := handlers.NewGuestHandler(categoryRepo, postRepo, commentRepo, reactionRepo)
+	// error handler doesn't need dependencies
 
 	// Create middleware
 	registerLimiter := middleware.NewRateLimiter()
@@ -46,6 +47,7 @@ func SetupRoutes(db *sql.DB) http.Handler {
 	mux.Handle("/forum/api/session/login", corsMiddleware.Handler(http.HandlerFunc(authHandler.Login)))
 	mux.Handle("/forum/api/session/logout", corsMiddleware.Handler(http.HandlerFunc(authHandler.Logout)))
 	mux.Handle("/forum/api/session/verify", corsMiddleware.Handler(http.HandlerFunc(authHandler.VerifySession)))
+	mux.Handle("/forum/api/error", corsMiddleware.Handler(http.HandlerFunc(handlers.ErrorHandler)))
 
 	// Protected routes with CSRF
 	protected := func(h http.Handler) http.Handler {
