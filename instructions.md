@@ -6,6 +6,9 @@ curl  http://localhost:8080/forum/api/guest
 ## Get categories
 curl http://localhost:8080/forum/api/categories
 
+## Get posts in a category
+curl http://localhost:8080/forum/api/categories/1/posts
+
 ## Register a new user:
 
 curl -X POST http://localhost:8080/forum/api/register \
