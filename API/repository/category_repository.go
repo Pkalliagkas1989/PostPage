@@ -3,8 +3,11 @@ package repository
 
 import (
 	"database/sql"
+	"errors"
 	"forum/models"
 )
+
+var ErrCategoryNotFound = errors.New("category not found")
 
 type CategoryRepository struct {
 	db *sql.DB
@@ -30,6 +33,19 @@ func (r *CategoryRepository) GetAll() ([]models.Category, error) {
 		categories = append(categories, cat)
 	}
 	return categories, nil
+}
+
+func (r *CategoryRepository) GetByID(id int) (*models.Category, error) {
+	var cat models.Category
+	err := r.db.QueryRow("SELECT category_id, name FROM categories WHERE category_id = ?", id).
+		Scan(&cat.ID, &cat.Name)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return nil, ErrCategoryNotFound
+		}
+		return nil, err
+	}
+	return &cat, nil
 }
 
 // repository/post_repository.go

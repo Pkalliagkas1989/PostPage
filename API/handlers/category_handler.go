@@ -65,6 +65,15 @@ func (h *CategoryHandler) GetPostsByCategory(w http.ResponseWriter, r *http.Requ
 		return
 	}
 
+	if _, err := h.CategoryRepo.GetByID(catID); err != nil {
+		if err == repository.ErrCategoryNotFound {
+			utils.ErrorResponse(w, "Category not found", http.StatusNotFound)
+			return
+		}
+		utils.ErrorResponse(w, "Failed to load category", http.StatusInternalServerError)
+		return
+	}
+
 	posts, err := h.PostRepo.GetPostsByCategoryWithUser(catID)
 	if err != nil {
 		utils.ErrorResponse(w, "Failed to load posts", http.StatusInternalServerError)
