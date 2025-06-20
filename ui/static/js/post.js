@@ -5,10 +5,14 @@ document.addEventListener('DOMContentLoaded', async () => {
   const container = document.getElementById('forumContainer');
   const postTpl = document.getElementById('post-template');
   const commentTpl = document.getElementById('comment-template');
-  const csrfToken = sessionStorage.getItem('csrf_token');
+  let csrfToken = sessionStorage.getItem('csrf_token');
 
   async function verify() {
     const data = await fetchJSON('http://localhost:8080/forum/api/session/verify', { credentials: 'include' });
+    if (data && data.csrf_token) {
+      sessionStorage.setItem('csrf_token', data.csrf_token);
+      csrfToken = data.csrf_token;
+    }
     return !!data;
   }
 

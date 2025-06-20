@@ -6,13 +6,17 @@ document.addEventListener('DOMContentLoaded', async () => {
   const postTpl = document.getElementById('post-template');
   const tabs = document.getElementById('category-tabs');
   const feedLink = document.getElementById('my-feed-link');
-  const csrfToken = sessionStorage.getItem('csrf_token');
+  let csrfToken = sessionStorage.getItem('csrf_token');
   let allData;
   const params = new URLSearchParams(window.location.search);
   const initialCat = parseInt(params.get('cat'), 10);
   let currentCatId = initialCat || null;
   async function verify() {
     const data = await fetchJSON('http://localhost:8080/forum/api/session/verify', { credentials: 'include' });
+    if (data && data.csrf_token) {
+      sessionStorage.setItem('csrf_token', data.csrf_token);
+      csrfToken = data.csrf_token;
+    }
     return !!data;
   }
   if (!(await verify())) {
