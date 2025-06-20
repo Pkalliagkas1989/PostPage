@@ -234,12 +234,19 @@ func (h *AuthHandler) VerifySession(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Optionally fetch user and return profile
+	// Fetch user profile
 	user, err := h.UserRepo.GetByID(session.UserID)
 	if err != nil {
 		http.Error(w, "User not found", http.StatusInternalServerError)
 		return
 	}
 
-	utils.JSONResponse(w, user, http.StatusOK)
+	// Include CSRF token so the frontend can restore it after a refresh
+	resp := models.LoginResponse{
+		User:      *user,
+		SessionID: session.SessionID,
+		CSRFToken: session.CSRFToken,
+	}
+
+	utils.JSONResponse(w, resp, http.StatusOK)
 }
